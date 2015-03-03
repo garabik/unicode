@@ -1,0 +1,75 @@
+This file is in UTF-8 encoding.
+
+To use unicode utility, you need: 
+ - python >=2.2 (generators are needed), preferrably wide
+   unicode build, 
+ - python optparse library (part of python2.3)
+ - UnicodeData.txt file (http://www.unicode.org/Public) which
+   you should put into /usr/share/unicode/, ~/.unicode/ or current working directory.
+ - if you want to see UniHan properties, you need also Unihan.txt file
+   which should be put into /usr/share/unicode/, ~./unicode/ or current working directory.
+
+
+Enter regular expression, hexadecimal number or some characters as an
+argument. unicode will try to guess what you want to look up, see the
+manpage if you want to force other behaviour (the manpage is also the
+best documentation). In particular, -r forces searching for regular
+expression in the names of character, -s forces unicode to display 
+information about the characters given.
+
+Here are just some examples how to use this script:
+
+$ unicode.py euro
+U+20A0 EURO-CURRENCY SIGN
+UTF-8: e2 82 a0   UTF-16BE: 20a0   Decimal: &#8352;
+₠
+Category: Sc (Symbol, Currency)
+Bidi: ET (European Number Terminator)
+
+U+20AC EURO SIGN
+UTF-8: e2 82 ac   UTF-16BE: 20ac   Decimal: &#8364;
+€
+Category: Sc (Symbol, Currency)
+Bidi: ET (European Number Terminator)
+
+$ unicode.py 00c0
+U+00C0 LATIN CAPITAL LETTER A WITH GRAVE
+UTF-8: c3 80   UTF-16BE: 00c0   Decimal: &#192;
+À (à)
+Lowercase: U+00E0
+Category: Lu (Letter, Uppercase)
+Bidi: L (Left-to-Right)
+Decomposition: 0041 0300
+
+
+
+You can specify a range of characters as argumets, unicode will show
+these characters in nice tabular format, aligned to 256-byte boundaries.  
+Use two dots ".." to indicate the range, e.g.
+
+       unicode 0450..0520
+
+will display the whole cyrillic, armenian and hebrew blocks (characters from U+0400 to U+05FF)
+
+       unicode 0400..
+
+will display just characters from U+0400 up to U+04FF
+
+Use --fromcp to query codepoints from other encodings:
+
+$ unicode --fromcp cp1250 -d 200
+U+010C LATIN CAPITAL LETTER C WITH CARON
+UTF-8: c4 8c  UTF-16BE: 010c  Decimal: &#268;
+Č (Č)
+Uppercase: U+010C
+Category: Lu (Letter, Uppercase)
+Bidi: L (Left-to-Right)
+Decomposition: 0043 030C
+
+Multibyte encodings are supported:
+$ unicode --fromcp big5 -x aff3
+
+and multi-char strings are supported, too:
+
+$ unicode --fromcp utf-8 -x c599c3adc5a5
+

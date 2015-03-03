@@ -1,0 +1,15 @@
+Source: unicode
+Section: utils
+Priority: optional
+Maintainer: Radovan Garabík <garabik@kassiopeia.juls.savba.sk>
+Build-Depends: debhelper (>= 4)
+Standards-Version: 3.8.0
+
+Package: unicode
+Architecture: all
+Depends: python (>= 2.3)
+Recommends: unicode-data
+Description: display unicode character properties
+ unicode is a simple command line utility that displays
+ properties for a given unicode character, or searches
+ unicode database for a given name.
