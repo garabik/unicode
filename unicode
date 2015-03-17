@@ -97,7 +97,7 @@ else:
 
 
 colours = {
-            'none'       :    "",
+            'no_colour'  :    "",
             'default'    :    "\033[0m",
             'bold'       :    "\033[1m",
             'underline'  :    "\033[4m",
@@ -592,11 +592,15 @@ def print_characters(clist, maxcount, query_wikipedia=0, query_wiktionary=0):
         if counter > options.maxcount:
             out("\nToo many characters to display, more than %s, use --max option to change it\n" % options.maxcount)
             return
+        for colour_key in colours.keys():
+            locals()[colour_key] = maybe_colours(colour_key)
         properties = get_unicode_properties(c)
         out(maybe_colours('bold'))
+        ordc = ord(c)
         out('U+%04X '% ord(c)) 
         if properties['name']:
             out(properties['name'])
+            name = properties['name']
         else:
             out(maybe_colours('default'))
             out(" - No such unicode character name in database")
@@ -606,33 +610,47 @@ def print_characters(clist, maxcount, query_wikipedia=0, query_wiktionary=0):
         ar = ["UTF-8", ' '.join([("%02x" % ord23(x)) for x in c.encode('utf-8')]) ,
               "UTF-16BE", ''.join([("%02x" % ord23(x)) for x in c.encode('utf-16be')]),
               "Decimal", "&#%s;" % ord(c) ]
-        if options.addcharset:
+        utf8 = ' '.join([("%02x" % ord23(x)) for x in c.encode('utf-8')])
+        utf16be = ''.join([("%02x" % ord23(x)) for x in c.encode('utf-16be')])
+        decimal = "&#%s;" % ordc
+        addcharset = options.addcharset
+        if addcharset:
             try:
-                rep = ' '.join([("%02x" % ord(x)) for x in c.encode(options.addcharset)] )
+                in_additional_charset = ' '.join([("%02x" % ord(x)) for x in c.encode(addcharset)] )
             except UnicodeError:
-                rep = "NONE"
-            ar.extend( [options.addcharset, rep] )
+                in_additional_charset = "NONE"
+            ar.extend( [addcharset, in_additional_charset] )
         printkv(*ar)
 
 
         if properties['combining']:
-            pc = " "+c
+            pchar = " "+c
         else:
-            pc = c
-        out(pc)
+            pchar = c
+        out(pchar)
         uppercase = properties['uppercase']
         lowercase = properties['lowercase']
+        opt_uppercase = opt_lowercase = ''
+        flipcase = None
         if uppercase:
             out(" (%s)" % uppercase)
             out('\n')
-            printkv( "Uppercase", 'U+%04X'% ord(properties['uppercase']) )
+            ord_uppercase = ord(properties['uppercase'])
+            printkv( "Uppercase", 'U+%04X'% ord_uppercase )
+            opt_uppercase = '\n{green}Uppercase:{default} {ord_uppercase:04X}'.format(**locals())
+            flipcase = uppercase
         elif lowercase:
             out(" (%s)" % properties['lowercase'])
             out('\n')
-            printkv( "Lowercase", 'U+%04X'% ord(properties['lowercase']) )
+            ord_lowercase = ord(properties['lowercase'])
+            printkv( "Lowercase", 'U+%04X'% ord_lowercase )
+            opt_lowercase = '\n{green}Lowercase:{default} {ord_lowercase:04X}'.format(**locals())
+            flipcase = lowercase
         else:
             out('\n')
-        printkv( 'Category', properties['category']+ " (%s)" % general_category[properties['category']] )
+        category = properties['category']
+        category_desc = general_category[category]
+        printkv( 'Category', category+ " (%s)" % category_desc )
 
         if properties['numeric_value']:
             printkv( 'Numeric value',  properties['numeric_value'])
@@ -640,8 +658,9 @@ def print_characters(clist, maxcount, query_wikipedia=0, query_wiktionary=0):
             printkv( 'Digit value',  properties['digit_value'])
 
         bidi = properties['bidi']
+        bidi_desc = bidi_category.get(bidi, bidi)
         if bidi:
-            printkv( 'Bidi', bidi+ " (%s)" % bidi_category.get(bidi, bidi) )
+            printkv( 'Bidi', bidi+ " (%s)" % bidi_desc )
         mirrored = properties['mirrored']
         if mirrored:
             out('Character is mirrored\n')
@@ -656,6 +675,24 @@ def print_characters(clist, maxcount, query_wikipedia=0, query_wiktionary=0):
             for key in uhp:
                 printkv(key, uhp[key])
         out('\n')
+
+
+        print ('formatted:')
+        if addcharset:
+            opt_additional = ' {green}{addcharset}:{default} {in_additional_charset}'.format(**locals())
+        else:
+            opt_additional = ''
+        if flipcase:
+            opt_flipcase = u' ({flipcase})'.format(**locals())
+        else:
+            opt_flipcase = ''
+        formatted_output = u'''{yellow}{bold}U+{ordc:04X} {name}{default}
+{green}UTF-8:{default} {utf8} {green}UTF-16BE:{default} {utf16be} {green}Decimal:{default} {decimal}{opt_additional}
+{pchar}{opt_flipcase}{opt_uppercase}{opt_lowercase}
+{green}Category:{default} {category} ({category_desc})
+{green}Bidi:{default} {bidi} ({bidi_desc})
+'''.format(**locals())
+        print(formatted_output.encode('utf-8'))
 
 
 def print_block(block):
