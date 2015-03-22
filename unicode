@@ -91,7 +91,7 @@ except locale.Error:
     iocharsetguess = "ascii"
 
 if os.environ.get('TERM') in biditerms and iocharsetguess.lower().startswith('utf'):
-    LTR = u'\u202d' # left to right override
+    LTR = unichr(0x202d) # left to right override
 else:
     LTR = ''
 
