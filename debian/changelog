@@ -1,9 +1,12 @@
-unicode (0.9.9) UNRELEASED; urgency=low
+unicode (1) unstable; urgency=low
 
   * added --wt to query wiktionary
-  * fix (somewhat) tabular display of fullwidth characters; try unicode 4000..5000
+  * fix (somewhat) tabular display of fullwidth characters;
+    try unicode 4000..5000
+  * this is the last version that tries to keep rigorously compatibility with
+    older python versions (going even back to pre-2.3)
 
- -- Radovan Garabík <garabik@kassiopeia.juls.savba.sk>  Wed, 25 Feb 2015 19:15:59 +0100
+ -- Radovan Garabík <garabik@kassiopeia.juls.savba.sk>  Sun, 22 Mar 2015 09:15:59 +0100
 
 unicode (0.9.8) unstable; urgency=low
 
