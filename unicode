@@ -854,7 +854,7 @@ if l_args:
         if not unihan_fs:
             out( """
 Unihan_*.txt files not found. In order to view Unihan properties, 
-please place the file into /usr/share/unidata/, 
+please place the files into /usr/share/unidata/, 
 /usr/share/unicode/, ~/.unicode/
 or current working directory (optionally you can gzip or bzip2 them).
 You can get the files by unpacking ftp://ftp.unicode.org/Public/UNIDATA/Unihan.zip
