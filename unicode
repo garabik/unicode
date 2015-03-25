@@ -569,7 +569,7 @@ def printkv(*l):
         out(unicode(v))
         out(sep)
 
-def print_characters(clist, maxcount, query_wikipedia=0, query_wiktionary=0):
+def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wiktionary=0):
     """query_wikipedia or query_wiktionary:
             0 - don't
             1 - spawn browser
@@ -585,7 +585,6 @@ def print_characters(clist, maxcount, query_wikipedia=0, query_wiktionary=0):
             wiki_url = wiki_base_url+ch
             webbrowser.open(wiki_url)
             query_wikipedia = query_wiktionary = 0 # query only the very first character
-
 
         if maxcount:
             counter += 1
@@ -686,12 +685,7 @@ def print_characters(clist, maxcount, query_wikipedia=0, query_wiktionary=0):
             opt_flipcase = u' ({flipcase})'.format(**locals())
         else:
             opt_flipcase = ''
-        formatted_output = u'''{yellow}{bold}U+{ordc:04X} {name}{default}
-{green}UTF-8:{default} {utf8} {green}UTF-16BE:{default} {utf16be} {green}Decimal:{default} {decimal}{opt_additional}
-{pchar}{opt_flipcase}{opt_uppercase}{opt_lowercase}
-{green}Category:{default} {category} ({category_desc})
-{green}Bidi:{default} {bidi} ({bidi_desc})
-'''.format(**locals())
+        formatted_output = format_string.format(**locals())
         print(formatted_output.encode('utf-8'))
 
 
@@ -748,6 +742,12 @@ def is_range(s, typ):
     high = high // 256 + 1
     return range(low, high)
 
+format_string_default = u'''{yellow}{bold}U+{ordc:04X} {name}{default}
+{green}UTF-8:{default} {utf8} {green}UTF-16BE:{default} {utf16be} {green}Decimal:{default} {decimal}{opt_additional}
+{pchar}{opt_flipcase}{opt_uppercase}{opt_lowercase}
+{green}Category:{default} {category} ({category_desc})
+{green}Bidi:{default} {bidi} ({bidi_desc})
+'''
 
 
 parser = OptionParser(usage="usage: %prog [options] arg")
@@ -808,9 +808,18 @@ parser.add_option("--list",
       action="store_const", dest="list_all_encodings",
       const=True,
       help="List (approximately) all known encodings")
-
+parser.add_option("--format",
+      action="store", dest="format_string", type="string",
+      default=format_string_default,
+      help="formatting string")
+parser.add_option("--brief",
+      action="store_const", dest="format_string",
+      const=u'{pchar} U+{ordc:04X} {name}',
+      help="Brief format")
 
 (options, arguments) = parser.parse_args()
+format_string = options.format_string
+
 
 linecache = {}
 do_init()
@@ -863,7 +872,7 @@ Warning, listing UniHan Properties is rather slow.
 """)
             options.verbosity = 0
     try:
-        print_characters(process(l_args, options.type, options.fromcp), options.maxcount, options.query_wikipedia, options.query_wiktionary)
+        print_characters(process(l_args, options.type, options.fromcp), options.maxcount, format_string, options.query_wikipedia, options.query_wiktionary)
     except IOError: # e.g. broken pipe
         pass
 
