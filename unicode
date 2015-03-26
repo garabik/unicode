@@ -2,7 +2,7 @@
 
 
 import os, glob, sys, unicodedata, locale, gzip, re, traceback, encodings
-import urllib, webbrowser, textwrap
+import urllib, webbrowser, textwrap, struct
 
 # bz2 was introduced in 2.3, we want this to work also with earlier versions
 try:
@@ -44,9 +44,6 @@ if PY3:
     # ord23 is used to convert elements of byte array in python3, which are integers
     ord23 = lambda x: x
 
-    # unichr is not in python3
-    unichr = chr
-
 else: # python2
 
     # getoutput() and getstatusoutput() methods have
@@ -69,11 +66,13 @@ else: # python2
 
     ord23 = ord
 
+    # python3-like chr
+    chr = unichr
 
 
 from optparse import OptionParser
 
-VERSION='0.9.9'
+VERSION='1rc'
 
 
 # list of terminals that support bidi
@@ -91,7 +90,7 @@ except locale.Error:
     iocharsetguess = "ascii"
 
 if os.environ.get('TERM') in biditerms and iocharsetguess.lower().startswith('utf'):
-    LTR = unichr(0x202d) # left to right override
+    LTR = chr(0x202d) # left to right override
 else:
     LTR = ''
 
@@ -227,11 +226,11 @@ def get_unicode_properties(ch):
                 properties[prop] = fields[i]
 
         if properties['lowercase']:
-            properties['lowercase'] = unichr(int(properties['lowercase'], 16))
+            properties['lowercase'] = chr(int(properties['lowercase'], 16))
         if properties['uppercase']:
-            properties['uppercase'] = unichr(int(properties['uppercase'], 16))
+            properties['uppercase'] = chr(int(properties['uppercase'], 16))
         if properties['titlecase']:
-            properties['titlecase'] = unichr(int(properties['titlecase'], 16))
+            properties['titlecase'] = chr(int(properties['titlecase'], 16))
 
         properties['combining'] = int(properties['combining'])
         properties['mirrored'] = properties['mirrored']=='Y'
@@ -377,7 +376,7 @@ Without the file, searching will be much slower.
 """ )
             for i in xrange(sys.maxunicode):
                 try:
-                    name = unicodedata.name(unichr(i))
+                    name = unicodedata.name(chr(i))
                     if re.search(p, name):
                         yield myunichr(i)
                 except ValueError:
@@ -399,14 +398,15 @@ Without the file, searching will be much slower.
  
 
 def valfromcp(n, cp=None):
-    "if fromcp is defined, then the 'n' is considered to be from that codepage and is converted accordingly"
+    "if cp is defined, then the 'n' is considered to be from that codepage and is converted accordingly"
     if cp:
         xh = '%x' %n
         if len(xh) % 2: # pad hexadecimal representation with a zero
             xh = '0'+xh
         cps = ( [xh[i:i+2] for i in range(0,len(xh),2)] )
-        cps = ( chr(int(i, 16)) for i in cps)
-        cps = ''.join(cps)
+        cps = ( int(i, 16) for i in cps)
+        cps = ( struct.pack('B',i) for i in cps ) # this works in both python3 and python2, unlike bytes([i])
+        cps = b''.join(cps)
         """
         if 0 <= n <= 255:
             s = chr(n)
@@ -427,7 +427,7 @@ def valfromcp(n, cp=None):
 
 def myunichr(n):
     try:
-        r = unichr(n)
+        r = chr(n)
         return r
     except OverflowError:
         traceback.print_exc()
@@ -705,7 +705,7 @@ def print_block(block):
             hexi = "     %03X" % i
         out(LTR+hexi+". ")
         for j in range(16):
-            c = unichr(i*16+j)
+            c = chr(i*16+j)
             c_out = c
             if unicodedata.combining(c):
                 c_out = " "+c
