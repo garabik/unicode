@@ -598,11 +598,12 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
         ordc = ord(c)
         out('U+%04X '% ord(c)) 
         if properties['name']:
-            out(properties['name'])
             name = properties['name']
+            out(name)
         else:
             out(maybe_colours('default'))
-            out(" - No such unicode character name in database")
+            name = " - No such unicode character name in database"
+            out(name)
         out(maybe_colours('default'))
         out('\n')
 
@@ -660,12 +661,18 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
         bidi_desc = bidi_category.get(bidi, bidi)
         if bidi:
             printkv( 'Bidi', bidi+ " (%s)" % bidi_desc )
+        mirrored_desc = ''
         mirrored = properties['mirrored']
         if mirrored:
+            mirrored_desc = 'Character is mirrored\n'
             out('Character is mirrored\n')
+        opt_combining = ''
         comb = properties['combining']
         if comb:
             printkv( 'Combining', str(comb)+ " (%s)" % (comb_classes.get(comb, '?')) )
+            opt_combining = 'Combining'
+            combining_desc = "{comb} ({comb_class})".format(comb=comb, comb_class=comb_classes.get(comb, '?'))
+
         decomp = properties['decomposition']
         if decomp:
             printkv( 'Decomposition', decomp )
@@ -686,7 +693,7 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
         else:
             opt_flipcase = ''
         formatted_output = format_string.format(**locals())
-        print(formatted_output.encode('utf-8'))
+        print(formatted_output) #.encode('utf-8'))
 
 
 def print_block(block):
@@ -747,6 +754,7 @@ format_string_default = u'''{yellow}{bold}U+{ordc:04X} {name}{default}
 {pchar}{opt_flipcase}{opt_uppercase}{opt_lowercase}
 {green}Category:{default} {category} ({category_desc})
 {green}Bidi:{default} {bidi} ({bidi_desc})
+{mirrored_desc}{green}{opt_combining}{default}{combining_desc}
 '''
 
 
