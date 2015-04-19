@@ -668,6 +668,7 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
             out('Character is mirrored\n')
         opt_combining = ''
         comb = properties['combining']
+        combining_desc = ''
         if comb:
             printkv( 'Combining', str(comb)+ " (%s)" % (comb_classes.get(comb, '?')) )
             opt_combining = 'Combining'
