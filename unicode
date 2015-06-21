@@ -595,78 +595,49 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
         properties = get_unicode_properties(c)
         out(maybe_colours('bold'))
         ordc = ord(c)
-        out('U+%04X '% ord(c)) 
         if properties['name']:
             name = properties['name']
-            out(name)
-        else:
-            out(maybe_colours('default'))
-            name = " - No such unicode character name in database"
-            out(name)
-        out(maybe_colours('default'))
-        out('\n')
-
-        ar = ["UTF-8", ' '.join([("%02x" % ord23(x)) for x in c.encode('utf-8')]) ,
-              "UTF-16BE", ''.join([("%02x" % ord23(x)) for x in c.encode('utf-16be')]),
-              "Decimal", "&#%s;" % ord(c) ]
         utf8 = ' '.join([("%02x" % ord23(x)) for x in c.encode('utf-8')])
         utf16be = ''.join([("%02x" % ord23(x)) for x in c.encode('utf-16be')])
         decimal = "&#%s;" % ordc
+
         addcharset = options.addcharset
         if addcharset:
             try:
                 in_additional_charset = ' '.join([("%02x" % ord(x)) for x in c.encode(addcharset)] )
             except UnicodeError:
                 in_additional_charset = "NONE"
-            ar.extend( [addcharset, in_additional_charset] )
-        printkv(*ar)
-
 
         if properties['combining']:
             pchar = " "+c
         else:
             pchar = c
-        out(pchar)
         uppercase = properties['uppercase']
         lowercase = properties['lowercase']
         opt_uppercase = opt_lowercase = ''
         flipcase = None
         if uppercase:
-            out(" (%s)" % uppercase)
-            out('\n')
             ord_uppercase = ord(properties['uppercase'])
-            printkv( "Uppercase", 'U+%04X'% ord_uppercase )
             opt_uppercase = '\n{green}Uppercase:{default} {ord_uppercase:04X}'.format(**locals())
             flipcase = uppercase
         elif lowercase:
-            out(" (%s)" % properties['lowercase'])
-            out('\n')
             ord_lowercase = ord(properties['lowercase'])
-            printkv( "Lowercase", 'U+%04X'% ord_lowercase )
             opt_lowercase = '\n{green}Lowercase:{default} {ord_lowercase:04X}'.format(**locals())
             flipcase = lowercase
-        else:
-            out('\n')
         category = properties['category']
         category_desc = general_category[category]
-        printkv( 'Category', category+ " (%s)" % category_desc )
 
         opt_numeric = ''
         numeric_desc = ''
         if properties['numeric_value']:
             opt_numeric = 'Numeric value: '
             numeric_desc = properties['numeric_value']+'\n'
-            printkv( 'Numeric value', properties['numeric_value'])
         opt_digit = ''
         digit_desc = ''
         if properties['digit_value']:
             opt_digit = 'Digit value: '
             digit_desc = properties['digit_value']+'\n'
-            printkv( 'Digit value', properties['digit_value'])
 
-
-        #if properties['digit_value']:
-        #    printkv( 'Digit value',  properties['digit_value'])
         opt_bidi = ''
         bidi_desc = ''
         bidi = properties['bidi']
@@ -674,17 +645,14 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
         if bidi:
             opt_bidi = 'Bidi: '
             bidi_desc = ' ({0})'.format(bidi_desc)
-            printkv( 'Bidi', bidi+ " (%s)" % bidi_desc )
         mirrored_desc = ''
         mirrored = properties['mirrored']
         if mirrored:
             mirrored_desc = 'Character is mirrored\n'
-            out('Character is mirrored\n')
         opt_combining = ''
         comb = properties['combining']
         combining_desc = ''
         if comb:
-            printkv( 'Combining', str(comb)+ " (%s)" % (comb_classes.get(comb, '?')) )
             opt_combining = 'Combining: '
             combining_desc = "{comb} ({comb_class})\n".format(comb=comb, comb_class=comb_classes.get(comb, '?'))
 
@@ -694,15 +662,7 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
         if decomp:
             opt_decomp = 'Decomposition: '
             decomp_desc = decomp+'\n'
-            printkv( 'Decomposition', decomp )
-        if options.verbosity>0:
-            uhp = get_unihan_properties(c)
-            for key in uhp:
-                printkv(key, uhp[key])
-        out('\n')
 
-
-        print ('formatted:')
         if addcharset:
             opt_additional = ' {green}{addcharset}:{default} {in_additional_charset}'.format(**locals())
         else:
@@ -712,7 +672,12 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
         else:
             opt_flipcase = ''
         formatted_output = format_string.format(**locals())
-        print(formatted_output) #.encode('utf-8'))
+        sys.stdout.write(formatted_output) #.encode('utf-8'))
+
+        if options.verbosity>0:
+            uhp = get_unihan_properties(c)
+            for key in uhp:
+                printkv(key, uhp[key])
 
 
 def print_block(block):
@@ -773,8 +738,7 @@ format_string_default = u'''{yellow}{bold}U+{ordc:04X} {name}{default}
 {pchar}{opt_flipcase}{opt_uppercase}{opt_lowercase}
 {green}Category:{default} {category} ({category_desc})
 {green}{opt_numeric}{default}{numeric_desc}{green}{opt_digit}{default}{digit_desc}{green}{opt_bidi}{default}{bidi}{bidi_desc}
-{mirrored_desc}{green}{opt_combining}{default}{combining_desc}{green}{opt_decomp}{default}{decomp_desc}
-'''
+{mirrored_desc}{green}{opt_combining}{default}{combining_desc}{green}{opt_decomp}{default}{decomp_desc}'''
 
 
 parser = OptionParser(usage="usage: %prog [options] arg")
@@ -841,7 +805,7 @@ parser.add_option("--format",
       help="formatting string")
 parser.add_option("--brief",
       action="store_const", dest="format_string",
-      const=u'{pchar} U+{ordc:04X} {name}',
+      const=u'{pchar} U+{ordc:04X} {name}\n',
       help="Brief format")
 
 (options, arguments) = parser.parse_args()
