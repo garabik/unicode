@@ -1,8 +1,16 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import sys, unicodedata
 from optparse import OptionParser
 
+# for python2 compatibility, decode from utf-8
+if sys.version_info[0] < 3:
+    decode = unicode
+    encode = lambda x, enc: x.encode(enc)
+else:
+    # for python3, the input is already unicode string
+    decode = lambda x, enc: x
+    encode = lambda x, enc: x
 
 
 table_cyrillic = {
@@ -162,7 +170,6 @@ table_mirror = {
 '?' : u'\N{INVERTED QUESTION MARK}',
 '!' : u'\N{INVERTED EXCLAMATION MARK}',
 
-
 }
 
 
@@ -229,13 +236,14 @@ if not to_convert:
         lines.reverse()
     else:
         lines = sys.stdin
-        
+
     for line in lines:
-        l = line.decode('utf-8')
+        l = decode(line, 'utf-8')
         out = do_convert(l, options.reverse)
-        sys.stdout.write(out.encode('utf-8'))
-    
+        sys.stdout.write(encode(out, 'utf-8'))
+
 else:
     out = do_convert(to_convert, options.reverse)
-    sys.stdout.write(out.encode('utf-8'))
+    sys.stdout.write(encode(out, 'utf-8'))
     sys.stdout.write('\n')
+
