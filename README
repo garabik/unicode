@@ -1,9 +1,9 @@
 This file is in UTF-8 encoding.
 
 To use unicode utility, you need: 
- - python >=2.2 (generators are needed), preferrably wide
+ - python >=2.6 (str format() method is needed), preferrably wide
    unicode build, 
- - python optparse library (part of python2.3)
+ - python optparse library (part of since python2.3)
  - UnicodeData.txt file (http://www.unicode.org/Public) which
    you should put into /usr/share/unicode/, ~/.unicode/ or current working directory.
  - if you want to see UniHan properties, you need also Unihan.txt file
