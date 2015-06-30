@@ -803,7 +803,7 @@ parser.add_option("-w", "--wikipedia",
 parser.add_option("--wt", "--wiktionary",
       action="count", dest="query_wiktionary",
       default=0,
-      help="Query wikipedia for the character")
+      help="Query wiktionary for the character")
 parser.add_option("--list",
       action="store_const", dest="list_all_encodings",
       const=True,
