@@ -13,30 +13,17 @@ try:
 except ImportError:
     bz2 = None
 
-# for python3
-try:
-    unicode
-except NameError:
-    unicode = str
-
-# 'any' and 'all' were introduced in python2.5
-# dummy replacement for older versions
-try:
-    all
-except NameError:
-    all = lambda x: False
+def is_ascii(s):
+    "test is string s consists completely of ascii characters"
+    try:
+        s.encode('ascii')
+    except UnicodeEncodeError:
+        return False
+    return True
 
 PY3 = sys.version_info[0] >= 3
 if PY3:
     import subprocess as cmd
-
-    def is_ascii(s):
-        "test is string s consists completely of ascii characters (python 3)"
-        try:
-            s.encode('ascii')
-        except UnicodeEncodeError:
-            return False
-        return True
 
     def out(*args):
         "pring args, converting them to output charset"
@@ -46,6 +33,7 @@ if PY3:
 
     # ord23 is used to convert elements of byte array in python3, which are integers
     ord23 = lambda x: x
+    chr_orig = chr
 
 else: # python2
 
@@ -53,14 +41,6 @@ else: # python2
     # been moved from commands to the subprocess module
     # with Python >= 3.x
     import commands as cmd
-
-    def is_ascii(s):
-        "test is string s consists completely of ascii characters (python 2)"
-        try:
-            unicode(s, 'ascii')
-        except UnicodeDecodeError:
-            return False
-        return True
 
     def out(*args):
         "pring args, converting them to output charset"
@@ -70,7 +50,9 @@ else: # python2
     ord23 = ord
 
     # python3-like chr
+    chr_orig = chr
     chr = unichr
+    str = unicode
 
 
 from optparse import OptionParser
@@ -289,7 +271,7 @@ def get_unihan_properties_internal(ch):
                 continue
             char, key, value = line.strip().split('\t')
             if int(char[2:], 16) == ch:
-                properties[key] = unicode(value, 'utf-8')
+                properties[key] = value.decode('utf-8')
             elif int(char[2:], 16)>ch:
                 break
     return properties
@@ -401,32 +383,19 @@ Without the file, searching will be much slower.
 
 def valfromcp(n, cp=None):
     "if cp is defined, then the 'n' is considered to be from that codepage and is converted accordingly"
+    "the output is a generator of codepoints (integers)"
     if cp:
         xh = '%x' %n
         if len(xh) % 2: # pad hexadecimal representation with a zero
             xh = '0'+xh
         cps = ( [xh[i:i+2] for i in range(0,len(xh),2)] )
         cps = ( int(i, 16) for i in cps)
-        cps = ( struct.pack('B',i) for i in cps ) # this works in both python3 and python2, unlike bytes([i])
-        #cps = b''.join(cps)
-        cpsr = ''
-        for  c in cps:
-            cpsr += c
-        """
-        if 0 <= n <= 255:
-            s = chr(n)
-        elif 256 <= n <= 65535:
-            s = struct.pack('>H', n)
-        elif 65536 <= n <= sys.maxint:
-            s = struct.pack('>H', n)
-        else: # bad character code, either negative or too big
-            raise ValueError("Bad character code %s" %n)
-        print 'ee',`s`
-        n = unicode(s, cp)
-        """
-        s = unicode(cps, cp)
-        ns = [ord(x) for x in s]
-        return ns
+        # we have to use chr_orig (it's original chr for python2) and not 'B'
+        # because of unicode_literals it will be unicode, which
+        # is not permitted in struct.pack in python2.6
+        cps = ( struct.pack(chr_orig(0x42),i) for i in cps ) # this works in both python3 and python2, unlike bytes([i])
+        cps = [ord(str(i, cp)) for i in cps]
+        return cps
     else:
         return [n]
 
@@ -533,6 +502,7 @@ def process(arglist, t, fromcp=None):
         elif tp=='regexp':
             names_query.append(arg)
         elif tp=='string':
+            '''
             try:
                 if PY3: # argv is automatically decoded into unicode, even padded with bogus character if it is not encodable
                     unirepr = arg
@@ -540,6 +510,8 @@ def process(arglist, t, fromcp=None):
                     unirepr = unicode(arg, options.iocharset)
             except UnicodeDecodeError:
                 error ("Sequence %s is not valid in charset '%s'." % (repr(arg),  options.iocharset))
+            '''
+            unirepr = arg
             unilist = ['%04X'%ord(x) for x in unirepr]
             unireg = '|'.join(unilist)
             list(GrepInNames(unireg, fillcache=True))
@@ -571,7 +543,7 @@ def printkv(*l):
         out(k)
         out(": ")
         out(maybe_colours('default'))
-        out(unicode(v))
+        out(str(v))
         out(sep)
 
 def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wiktionary=0):
@@ -850,6 +822,12 @@ else:
 
 l_args = [] # list of non range arguments to process
 for argum in arguments:
+    if not PY3:
+        try:
+            # in python3, argv is automatically decoded into unicode
+            argum = unicode(argum, options.iocharset)
+        except UnicodeDecodeError:
+            error ("Sequence %s is not valid in charset '%s'." % (repr(arg),  options.iocharset))
     is_r = is_range(argum, options.type)
     if is_r:
         print_blocks(is_r)
