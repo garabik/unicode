@@ -584,7 +584,7 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
         addcharset = options.addcharset
         if addcharset:
             try:
-                in_additional_charset = ' '.join([("%02x" % ord(x)) for x in c.encode(addcharset)] )
+                in_additional_charset = ' '.join([("%02x" % ord23(x)) for x in c.encode(addcharset)] )
             except UnicodeError:
                 in_additional_charset = "NONE"
 
@@ -819,15 +819,16 @@ else:
     if sys.platform == 'win32':
         use_colour = False
 
-
 l_args = [] # list of non range arguments to process
 for argum in arguments:
-    if not PY3:
-        try:
-            # in python3, argv is automatically decoded into unicode
-            argum = unicode(argum, options.iocharset)
-        except UnicodeDecodeError:
-            error ("Sequence %s is not valid in charset '%s'." % (repr(argum),  options.iocharset))
+    if PY3:
+        # in python3, argv is automatically decoded into unicode
+        # but we have to check for surrogates
+        argum = argum.encode(options.iocharset, 'surrogateescape')
+    try:
+        argum = argum.decode(options.iocharset)
+    except UnicodeDecodeError:
+        error ("Sequence %s is not valid in charset '%s'." % (repr(argum),  options.iocharset))
     is_r = is_range(argum, options.type)
     if is_r:
         print_blocks(is_r)
