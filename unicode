@@ -827,7 +827,7 @@ for argum in arguments:
             # in python3, argv is automatically decoded into unicode
             argum = unicode(argum, options.iocharset)
         except UnicodeDecodeError:
-            error ("Sequence %s is not valid in charset '%s'." % (repr(arg),  options.iocharset))
+            error ("Sequence %s is not valid in charset '%s'." % (repr(argum),  options.iocharset))
     is_r = is_range(argum, options.type)
     if is_r:
         print_blocks(is_r)
