@@ -31,7 +31,7 @@ if PY3:
             sys.stdout.flush()
             sys.stdout.buffer.write(i.encode(options.iocharset, 'replace'))
 
-    # ord23 is used to convert elements of byte array in python3, which are integers
+    # ord23 is used to convert elements of byte array in python3, which are already integers
     ord23 = lambda x: x
     chr_orig = chr
 
