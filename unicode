@@ -672,7 +672,7 @@ def print_block(block):
             c_out = c
             if unicodedata.combining(c):
                 c_out = " "+c
-            # fallback for old python (<2.5) without east_asian_width
+            # fallback for python without east_asian_width (probably unnecessary, since this script does not work with <2.6 anyway)
             fullwidth = 'east_asian_width' in unicodedata.__dict__ and unicodedata.east_asian_width(c)[0] in 'FW'
             if not fullwidth:
                 c_out = ' '+c_out
