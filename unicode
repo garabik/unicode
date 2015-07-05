@@ -502,15 +502,6 @@ def process(arglist, t, fromcp=None):
         elif tp=='regexp':
             names_query.append(arg)
         elif tp=='string':
-            '''
-            try:
-                if PY3: # argv is automatically decoded into unicode, even padded with bogus character if it is not encodable
-                    unirepr = arg
-                else:
-                    unirepr = unicode(arg, options.iocharset)
-            except UnicodeDecodeError:
-                error ("Sequence %s is not valid in charset '%s'." % (repr(arg),  options.iocharset))
-            '''
             unirepr = arg
             unilist = ['%04X'%ord(x) for x in unirepr]
             unireg = '|'.join(unilist)
