@@ -73,3 +73,12 @@ and multi-char strings are supported, too:
 
 $ unicode --fromcp utf-8 -x c599c3adc5a5
 
+
+On format:
+
+{yellow}{bold}U+{ordc:04X} {name}{default}
+{green}UTF-8:{default} {utf8} {green}UTF-16BE:{default} {utf16be} {green}Decimal:{default} {decimal}{opt_additional}
+{pchar}{opt_flipcase}{opt_uppercase}{opt_lowercase}
+{green}Category:{default} {category} ({category_desc})
+{green}{opt_numeric}{default}{numeric_desc}{green}{opt_digit}{default}{digit_desc}{green}{opt_bidi}{default}{bidi}{bidi_desc}
+{mirrored_desc}{green}{opt_combining}{default}{combining_desc}{green}{opt_decomp}{default}{decomp_desc}'''
