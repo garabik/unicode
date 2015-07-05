@@ -383,7 +383,7 @@ Without the file, searching will be much slower.
 
 def valfromcp(n, cp=None):
     "if cp is defined, then the 'n' is considered to be from that codepage and is converted accordingly"
-    "the output is a generator of codepoints (integers)"
+    "the output is a list of codepoints (integers)"
     if cp:
         xh = '%x' %n
         if len(xh) % 2: # pad hexadecimal representation with a zero
@@ -394,7 +394,9 @@ def valfromcp(n, cp=None):
         # because of unicode_literals it will be unicode, which
         # is not permitted in struct.pack in python2.6
         cps = ( struct.pack(chr_orig(0x42),i) for i in cps ) # this works in both python3 and python2, unlike bytes([i])
-        cps = [ord(str(i, cp)) for i in cps]
+        cps = b''.join(cps)
+        cps = cps.decode(cp)
+        cps = [ord(x) for x in cps]
         return cps
     else:
         return [n]
@@ -711,7 +713,6 @@ format_string_default = '''{yellow}{bold}U+{ordc:04X} {name}{default}
 {green}Category:{default} {category} ({category_desc})
 {green}{opt_numeric}{default}{numeric_desc}{green}{opt_digit}{default}{digit_desc}{green}{opt_bidi}{default}{bidi}{bidi_desc}
 {mirrored_desc}{green}{opt_combining}{default}{combining_desc}{green}{opt_decomp}{default}{decomp_desc}'''
-
 
 parser = OptionParser(usage="usage: %prog [options] arg")
 parser.add_option("-x", "--hexadecimal",
