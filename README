@@ -5,19 +5,21 @@ To use unicode utility, you need:
    unicode build, however, python3 is recommended
  - python optparse library (part of since python2.3)
  - UnicodeData.txt file (http://www.unicode.org/Public) which
-   you should put into /usr/share/unicode/, ~/.unicode/ or current working directory.
+   you should put into /usr/share/unicode/, ~/.unicode/ or current
+   working directory.
  - if you want to see UniHan properties, you need also Unihan.txt file
-   which should be put into /usr/share/unicode/, ~./unicode/ or current working directory.
+   which should be put into /usr/share/unicode/, ~./unicode/ or
+   current working directory.
 
 
 Enter regular expression, hexadecimal number or some characters as an
 argument. unicode will try to guess what you want to look up, see the
 manpage if you want to force other behaviour (the manpage is also the
 best documentation). In particular, -r forces searching for regular
-expression in the names of character, -s forces unicode to display 
+expression in the names of character, -s forces unicode to display
 information about the characters given.
 
-Here are just some examples how to use this script:
+Here are just some examples:
 
 $ unicode.py euro
 U+20A0 EURO-CURRENCY SIGN
@@ -76,9 +78,31 @@ $ unicode --fromcp utf-8 -x c599c3adc5a5
 
 On format:
 
-{yellow}{bold}U+{ordc:04X} {name}{default}
-{green}UTF-8:{default} {utf8} {green}UTF-16BE:{default} {utf16be} {green}Decimal:{default} {decimal}{opt_additional}
-{pchar}{opt_flipcase}{opt_uppercase}{opt_lowercase}
-{green}Category:{default} {category} ({category_desc})
-{green}{opt_numeric}{default}{numeric_desc}{green}{opt_digit}{default}{digit_desc}{green}{opt_bidi}{default}{bidi}{bidi_desc}
-{mirrored_desc}{green}{opt_combining}{default}{combining_desc}{green}{opt_decomp}{default}{decomp_desc}'''
+You can use standard python .format() syntax. Following variables are
+recognized:
+
+{black} {red} {green} {yellow}
+{blue} {magenta} {cyan} {white}  -- ANSI colours (foreground)
+
+{on_black} {on_red} ...          -- ANSI colours (background)
+
+{no_colour} {default} {bold}
+{underline} {blink} {reverse}
+{concealed}                      -- self-explaining ANSI escape codes
+
+{ordc} -- unicode codepoint of the character (integer)
+{name} -- unicode name of the character
+{utf8}
+{utf16be}
+{decimal}
+{opt_additional}
+{pchar}
+{opt_flipcase}{opt_uppercase}{opt_lowercase}
+{category} {category_desc}
+{opt_numeric} {numeric_desc}
+{opt_digit}{digit_desc}
+{opt_bidi}{bidi}{bidi_desc}
+{mirrored_desc}
+{opt_combining}{combining_desc}
+{opt_decomp}{decomp_desc}
+
