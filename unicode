@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 
 import os, glob, sys, unicodedata, locale, gzip, re, traceback, encodings
-import urllib, webbrowser, textwrap, struct
+import webbrowser, textwrap, struct
 
 
 # bz2 was introduced in 2.3, we want this to work also with earlier versions
@@ -29,6 +29,7 @@ def is_ascii(s):
 PY3 = sys.version_info[0] >= 3
 if PY3:
     import subprocess as cmd
+    from urllib.parse import quote as urlquote
 
     def out(*args):
         "pring args, converting them to output charset"
@@ -47,6 +48,8 @@ else: # python2
     # with Python >= 3.x
     import commands as cmd
 
+    from urllib import quote as urlquote
+
     def out(*args):
         "pring args, converting them to output charset"
         for i in args:
@@ -58,7 +61,7 @@ else: # python2
     chr_orig = chr
     chr = unichr
     str = unicode
-
+    range = xrange
 
 from optparse import OptionParser
 
@@ -367,7 +370,7 @@ working directory (optionally you can gzip it).
 Without the file, searching will be much slower.
 
 """ )
-            for i in xrange(sys.maxunicode):
+            for i in range(sys.maxunicode):
                 try:
                     name = unicodedata.name(chr(i))
                     if pat.search(name):
@@ -382,7 +385,9 @@ Without the file, searching will be much slower.
                     yield r
             f.close()
     else:
+        print('fc')
         if f:
+            print(f)
             for l in f:
                 if pat.search(l):
                     r = myunichr(int(l.split(';')[0], 16))
@@ -514,9 +519,9 @@ def process(arglist, t, fromcp=None, prefill_cache=False):
                 result.append(r)
         elif tp=='empty string':
             pass # do not do anything for an empty string
-        if result and prefill_cache:
-            hx = '|'.join('%04X'%ord(x) for x in result)
-            list(GrepInNames(hx, prefill_cache=True))
+    if result and prefill_cache:
+        hx = '|'.join('%04X'%ord(x) for x in result)
+        list(GrepInNames(hx, prefill_cache=True))
     if names_query:
         query = '.*'.join(names_query)
         for r in GrepInNames(query):
@@ -553,7 +558,7 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
     for c in clist:
 
         if query_wikipedia or query_wiktionary:
-            ch = urllib.quote(c.encode('utf-8')) # wikipedia uses UTF-8 in names
+            ch = urlquote(c.encode('utf-8')) # wikipedia uses UTF-8 in names
             wiki_base_url = 'http://en.wikipedia.org/wiki/'
             if query_wiktionary:
                 wiki_base_url = 'http://en.wiktionary.org/wiki/'
