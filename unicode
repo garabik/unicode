@@ -12,6 +12,11 @@ try:
     import bz2
 except ImportError:
     bz2 = None
+try:
+    import lzma
+except ImportError:
+    lzma = None
+
 
 def is_ascii(s):
     "test is string s consists completely of ascii characters"
@@ -286,20 +291,21 @@ def get_unihan_properties_zgrep(ch):
             grepcmd = 'zgrep'
         elif f.endswith('.bz2'):
             grepcmd = 'bzgrep'
+        elif f.endswith('.xz'):
+            grepcmd = 'xzgrep'
         else:
             grepcmd = 'grep'
         cmdline = grepcmd+' ^'+chs+r'\\b '+f
         status, output = cmd.getstatusoutput(cmdline)
+        if not PY3:
+            output = unicode(output, 'utf-8')
         output = output.split('\n')
         for l in output:
             if not l:
                 continue
             char, key, value = l.strip().split('\t')
             if int(char[2:], 16) == ch:
-                if PY3:
-                    properties[key] = value
-                else:
-                    properties[key] = unicode(value, 'utf-8')
+                properties[key] = value
             elif int(char[2:], 16)>ch:
                 break
     return properties
@@ -324,31 +330,34 @@ def get_gzip_filename(fname):
         return fname+'.gz'
     if os.path.exists(fname+'.bz2') and bz2 is not None:
         return fname+'.bz2'
+    if os.path.exists(fname+'.xz') and lzma is not None:
+        return fname+'.xz'
+
     return None
 
 
 def OpenGzip(fname):
     "open fname, try fname.gz or fname.bz2 if fname does not exist, return file object or GzipFile or BZ2File object"
-    if os.path.exists(fname) and not (fname.endswith('.gz') or fname.endswith('.bz2')):
-        return open(fname)
-    if os.path.exists(fname+'.gz'):
-        fname = fname+'.gz'
-    elif os.path.exists(fname+'.bz2') and bz2 is not None:
-        fname = fname+'.bz2'
+    fname = get_gzip_filename(fname)
+    if not fname:
+        return None
     if fname.endswith('.gz'):
         return gzip.GzipFile(fname)
     elif fname.endswith('.bz2'):
         return bz2.BZ2File(fname)
-    return None
+    elif fname.endswith('.xz'):
+        return lzma.open(fname)
+    else:
+        return open(fname)
 
-def GrepInNames(pattern, fillcache=False):
-    p = re.compile(pattern, re.I)
+def GrepInNames(pattern, prefill_cache=False):
+    pat = re.compile(pattern, re.I)
     f = None
     for name in UnicodeDataFileNames:
         f = OpenGzip(name)
         if f != None:
             break
-    if not fillcache:
+    if not prefill_cache:
         if not f:
             out( """
 Cannot find UnicodeData.txt, please place it into 
@@ -361,13 +370,13 @@ Without the file, searching will be much slower.
             for i in xrange(sys.maxunicode):
                 try:
                     name = unicodedata.name(chr(i))
-                    if re.search(p, name):
+                    if pat.search(name):
                         yield myunichr(i)
                 except ValueError:
                     pass
         else:
             for l in f:
-                if re.search(p, l):
+                if pat.search(l):
                     r = myunichr(int(l.split(';')[0], 16))
                     linecache[r] = l
                     yield r
@@ -375,7 +384,7 @@ Without the file, searching will be much slower.
     else:
         if f:
             for l in f:
-                if re.search(p, l):
+                if pat.search(l):
                     r = myunichr(int(l.split(';')[0], 16))
                     linecache[r] = l
             f.close()
@@ -456,7 +465,7 @@ def guesstype(arg):
     else:
         return 'string', arg
 
-def process(arglist, t, fromcp=None):
+def process(arglist, t, fromcp=None, prefill_cache=False):
     # build a list of values, so that we can combine queries like
     # LATIN ALPHA and search for LATIN.*ALPHA and not names that
     # contain either LATIN or ALPHA
@@ -478,40 +487,36 @@ def process(arglist, t, fromcp=None):
             vals = valfromcp(val, fromcp)
             for val in vals:
                 r = myunichr(val)
-                list(GrepInNames('%04X'%val, fillcache=True)) # fill the table with character properties
                 result.append(r)
         elif tp=='decimal':
             val = int(arg, 10)
             vals = valfromcp(val, fromcp)
             for val in vals:
                 r = myunichr(val)
-                list(GrepInNames('%04X'%val, fillcache=True)) # fill the table with character properties
                 result.append(r)
         elif tp=='octal':
             val = int(arg, 8)
             vals = valfromcp(val, fromcp)
             for val in vals:
                 r = myunichr(val)
-                list(GrepInNames('%04X'%val, fillcache=True)) # fill the table with character properties
                 result.append(r)
         elif tp=='binary':
             val = int(arg, 2)
             vals = valfromcp(val, fromcp)
             for val in vals:
                 r = myunichr(val)
-                list(GrepInNames('%04X'%val, fillcache=True)) # fill the table with character properties
                 result.append(r)
         elif tp=='regexp':
             names_query.append(arg)
         elif tp=='string':
             unirepr = arg
-            unilist = ['%04X'%ord(x) for x in unirepr]
-            unireg = '|'.join(unilist)
-            list(GrepInNames(unireg, fillcache=True))
             for r in unirepr:
                 result.append(r)
         elif tp=='empty string':
             pass # do not do anything for an empty string
+        if result and prefill_cache:
+            hx = '|'.join('%04X'%ord(x) for x in result)
+            list(GrepInNames(hx, prefill_cache=True))
     if names_query:
         query = '.*'.join(names_query)
         for r in GrepInNames(query):
@@ -842,8 +847,6 @@ Warning, listing UniHan Properties is rather slow.
 
 """)
             options.verbosity = 0
-    try:
-        print_characters(process(l_args, options.type, options.fromcp), options.maxcount, format_string, options.query_wikipedia, options.query_wiktionary)
-    except IOError: # e.g. broken pipe
-        pass
+    processed_args = process(l_args, options.type, options.fromcp, prefill_cache=True)
+    print_characters(processed_args, options.maxcount, format_string, options.query_wikipedia, options.query_wiktionary)
 
