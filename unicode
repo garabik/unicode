@@ -30,6 +30,7 @@ PY3 = sys.version_info[0] >= 3
 if PY3:
     import subprocess as cmd
     from urllib.parse import quote as urlquote
+    import io
 
     def out(*args):
         "pring args, converting them to output charset"
@@ -342,16 +343,21 @@ def get_gzip_filename(fname):
 def OpenGzip(fname):
     "open fname, try fname.gz or fname.bz2 if fname does not exist, return file object or GzipFile or BZ2File object"
     fname = get_gzip_filename(fname)
+    fo = None
     if not fname:
         return None
     if fname.endswith('.gz'):
-        return gzip.GzipFile(fname)
+        fo = gzip.GzipFile(fname)
     elif fname.endswith('.bz2'):
-        return bz2.BZ2File(fname)
+        fo = bz2.BZ2File(fname)
     elif fname.endswith('.xz'):
-        return lzma.open(fname)
+        fo = lzma.open(fname)
     else:
         return open(fname)
+    if fo:
+        if PY3:
+            fo = io.TextIOWrapper(fo, encoding='utf-8')
+        return fo
 
 def GrepInNames(pattern, prefill_cache=False):
     pat = re.compile(pattern, re.I)
@@ -360,9 +366,8 @@ def GrepInNames(pattern, prefill_cache=False):
         f = OpenGzip(name)
         if f != None:
             break
-    if not prefill_cache:
-        if not f:
-            out( """
+    if not f:
+        out( """
 Cannot find UnicodeData.txt, please place it into 
 /usr/share/unidata/UnicodeData.txt,
 /usr/share/unicode/UnicodeData.txt, ~/.unicode/ or current 
@@ -370,6 +375,23 @@ working directory (optionally you can gzip it).
 Without the file, searching will be much slower.
 
 """ )
+
+    if prefill_cache:
+        if f:
+            for l in f:
+                if pat.search(l):
+                    r = myunichr(int(l.split(';')[0], 16))
+                    linecache[r] = l
+            f.close()
+    else:
+        if f:
+            for l in f:
+                if pat.search(l):
+                    r = myunichr(int(l.split(';')[0], 16))
+                    linecache[r] = l
+                    yield r
+            f.close()
+        else:
             for i in range(sys.maxunicode):
                 try:
                     name = unicodedata.name(chr(i))
@@ -377,23 +399,6 @@ Without the file, searching will be much slower.
                         yield myunichr(i)
                 except ValueError:
                     pass
-        else:
-            for l in f:
-                if pat.search(l):
-                    r = myunichr(int(l.split(';')[0], 16))
-                    linecache[r] = l
-                    yield r
-            f.close()
-    else:
-        print('fc')
-        if f:
-            print(f)
-            for l in f:
-                if pat.search(l):
-                    r = myunichr(int(l.split(';')[0], 16))
-                    linecache[r] = l
-            f.close()
- 
 
 def valfromcp(n, cp=None):
     "if cp is defined, then the 'n' is considered to be from that codepage and is converted accordingly"
