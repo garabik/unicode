@@ -66,7 +66,7 @@ else: # python2
 
 from optparse import OptionParser
 
-VERSION='1rc'
+VERSION='1'
 
 
 # list of terminals that support bidi
@@ -727,7 +727,8 @@ format_string_default = '''{yellow}{bold}U+{ordc:04X} {name}{default}
 {pchar}{opt_flipcase}{opt_uppercase}{opt_lowercase}
 {green}Category:{default} {category} ({category_desc})
 {green}{opt_numeric}{default}{numeric_desc}{green}{opt_digit}{default}{digit_desc}{green}{opt_bidi}{default}{bidi}{bidi_desc}
-{mirrored_desc}{green}{opt_combining}{default}{combining_desc}{green}{opt_decomp}{default}{decomp_desc}'''
+{mirrored_desc}{green}{opt_combining}{default}{combining_desc}{green}{opt_decomp}{default}{decomp_desc}
+'''
 
 parser = OptionParser(usage="usage: %prog [options] arg")
 parser.add_option("-x", "--hexadecimal",
@@ -848,7 +849,7 @@ if l_args:
         unihan_fs = get_unihan_files() # list of file names for Unihan data file(s), empty if not available
         if not unihan_fs:
             out( """
-Unihan_*.txt files not found. In order to view Unihan properties, 
+Unihan_*.txt files not found. In order to view Unihan properties,
 please place the files into /usr/share/unidata/, 
 /usr/share/unicode/, ~/.unicode/
 or current working directory (optionally you can gzip or bzip2 them).
