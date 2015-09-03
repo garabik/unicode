@@ -92,9 +92,9 @@ recognized:
 
 {ordc} -- unicode codepoint of the character (integer)
 {name} -- unicode name of the character
-{utf8}
-{utf16be}
-{decimal}
+{utf8} -- utf8 representation of the character (hexadecimal)
+{utf16be} -- utf16 representation of the character (hexadecimal)
+{decimal} -- decimal representation of the character
 {opt_additional}
 {pchar}
 {opt_flipcase}{opt_uppercase}{opt_lowercase}
