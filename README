@@ -95,9 +95,12 @@ recognized:
 {utf8} -- utf8 representation of the character (hexadecimal)
 {utf16be} -- utf16 representation of the character (hexadecimal)
 {decimal} -- decimal representation of the character
-{opt_additional}
-{pchar}
-{opt_flipcase}{opt_uppercase}{opt_lowercase}
+{opt_additional} -- optional representation in additional charset (-c); 
+                    empty string if not specified
+{pchar} -- the character itself
+{opt_flipcase} -- upper- or lowercase opposite of the character, in parentheses;
+                  empty if character is not cased
+{opt_uppercase}{opt_lowercase}
 {category} {category_desc}
 {opt_numeric} {numeric_desc}
 {opt_digit}{digit_desc}
