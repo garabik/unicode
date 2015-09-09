@@ -100,9 +100,13 @@ recognized:
 {pchar} -- the character itself
 {opt_flipcase} -- upper- or lowercase opposite of the character, in parentheses;
                   empty if character is not cased
-{opt_uppercase}{opt_lowercase}
-{category} {category_desc}
-{opt_numeric} {numeric_desc}
+{opt_uppercase}{opt_lowercase} -- optional string describing uppercase
+                                  or lowercase variant of the character;
+                                  empty if character is not cased
+{category} {category_desc} -- character category and its human readable description
+{opt_numeric}{numeric_desc} -- the string `Numeric value:' and the numeric value
+                                of the character; both empty if the character
+                                has no numeric value
 {opt_digit}{digit_desc}
 {opt_bidi}{bidi}{bidi_desc}
 {mirrored_desc}
