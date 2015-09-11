@@ -105,11 +105,17 @@ recognized:
                                   empty if character is not cased
 {category} {category_desc} -- character category and its human readable description
 {opt_numeric}{numeric_desc} -- the string `Numeric value:' and the numeric value
-                                of the character; both empty if the character
-                                has no numeric value
-{opt_digit}{digit_desc}
-{opt_bidi}{bidi}{bidi_desc}
-{mirrored_desc}
+                               of the character; both empty if the character
+                               has no numeric value
+{opt_digit}{digit_desc} -- the string `Digit value:' and the digit value
+                           of the character; both empty if the character
+                           has no digit value
+{opt_bidi}{bidi}{bidi_desc} -- the string `Bidi:', the bidi property and
+                               a human readable description 
+                               of the bidi property; empty if the character
+                               has no bidi category
+{mirrored_desc} -- the string 'Character is mirrored' if the character is mirrored,
+                   empty otherwise
 {opt_combining}{combining_desc}
 {opt_decomp}{decomp_desc}
 
