@@ -116,6 +116,10 @@ recognized:
                                has no bidi category
 {mirrored_desc} -- the string 'Character is mirrored' if the character is mirrored,
                    empty otherwise
-{opt_combining}{combining_desc}
-{opt_decomp}{decomp_desc}
+{opt_combining}{combining_desc} -- the string `Combining: ', combining class and a
+                                   human readable description of the combining class;
+                                   empty if the character is not combining
+{opt_decomp}{decomp_desc} -- the string `Decomposition: ' and a hexadecimal sequence
+                             of decomposition characters; empty if the character
+                             has no decomposition
 
