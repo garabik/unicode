@@ -76,7 +76,10 @@ and multi-char strings are supported, too:
 $ unicode --fromcp utf-8 -x c599c3adc5a5
 
 
-On format:
+On format (--format='...'):
+
+Format string tells unicode which information should be displayed.
+There is one (and only one) escape character recognised, \n for a new line.
 
 You can use standard python .format() syntax. Following variables are
 recognized:
