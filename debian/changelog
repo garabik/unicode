@@ -1,5 +1,15 @@
 unicode (1) unstable; urgency=low
 
+  * new version, completely reworked formatting
+  * full python3 support
+  * drop old python2.5 compatibility
+  * implement --brief (closes: #708318)
+  * implement --format (closes: #605642)
+
+ -- Radovan Garabík <garabik@kassiopeia.juls.savba.sk>  Mon, 05 Oct 2015 21:20:31 +0200
+
+unicode (0.9.9) unstable; urgency=low
+
   * added --wt to query wiktionary
   * fix (somewhat) tabular display of fullwidth characters;
     try unicode 4000..5000
