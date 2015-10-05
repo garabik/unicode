@@ -1,39 +1,36 @@
-#!/usr/bin/python
+#!/usr/bin/python3
+
+from __future__ import unicode_literals
 
 
 import os, glob, sys, unicodedata, locale, gzip, re, traceback, encodings
-import urllib, webbrowser, textwrap
+import webbrowser, textwrap, struct
+
 
 # bz2 was introduced in 2.3, we want this to work also with earlier versions
 try:
     import bz2
 except ImportError:
     bz2 = None
-
-# for python3
 try:
-    unicode
-except NameError:
-    unicode = str
+    import lzma
+except ImportError:
+    lzma = None
 
-# 'any' and 'all' were introduced in python2.5
-# dummy replacement for older versions
-try:
-    all
-except NameError:
-    all = lambda x: False
+
+def is_ascii(s):
+    "test is string s consists completely of ascii characters"
+    try:
+        s.encode('ascii')
+    except UnicodeEncodeError:
+        return False
+    return True
 
 PY3 = sys.version_info[0] >= 3
 if PY3:
     import subprocess as cmd
-
-    def is_ascii(s):
-        "test is string s consists completely of ascii characters (python 3)"
-        try:
-            s.encode('ascii')
-        except UnicodeEncodeError:
-            return False
-        return True
+    from urllib.parse import quote as urlquote
+    import io
 
     def out(*args):
         "pring args, converting them to output charset"
@@ -41,11 +38,9 @@ if PY3:
             sys.stdout.flush()
             sys.stdout.buffer.write(i.encode(options.iocharset, 'replace'))
 
-    # ord23 is used to convert elements of byte array in python3, which are integers
+    # ord23 is used to convert elements of byte array in python3, which are already integers
     ord23 = lambda x: x
-
-    # unichr is not in python3
-    unichr = chr
+    chr_orig = chr
 
 else: # python2
 
@@ -54,13 +49,7 @@ else: # python2
     # with Python >= 3.x
     import commands as cmd
 
-    def is_ascii(s):
-        "test is string s consists completely of ascii characters (python 2)"
-        try:
-            unicode(s, 'ascii')
-        except UnicodeDecodeError:
-            return False
-        return True
+    from urllib import quote as urlquote
 
     def out(*args):
         "pring args, converting them to output charset"
@@ -69,7 +58,11 @@ else: # python2
 
     ord23 = ord
 
-
+    # python3-like chr
+    chr_orig = chr
+    chr = unichr
+    str = unicode
+    range = xrange
 
 from optparse import OptionParser
 
@@ -91,13 +84,13 @@ except locale.Error:
     iocharsetguess = "ascii"
 
 if os.environ.get('TERM') in biditerms and iocharsetguess.lower().startswith('utf'):
-    LTR = unichr(0x202d) # left to right override
+    LTR = chr(0x202d) # left to right override
 else:
     LTR = ''
 
 
 colours = {
-            'none'       :    "",
+            'no_colour'  :    "",
             'default'    :    "\033[0m",
             'bold'       :    "\033[1m",
             'underline'  :    "\033[4m",
@@ -216,7 +209,6 @@ comb_classes = {
 }
 
 
-
 def get_unicode_properties(ch):
     properties = {}
     if ch in linecache:
@@ -227,11 +219,11 @@ def get_unicode_properties(ch):
                 properties[prop] = fields[i]
 
         if properties['lowercase']:
-            properties['lowercase'] = unichr(int(properties['lowercase'], 16))
+            properties['lowercase'] = chr(int(properties['lowercase'], 16))
         if properties['uppercase']:
-            properties['uppercase'] = unichr(int(properties['uppercase'], 16))
+            properties['uppercase'] = chr(int(properties['uppercase'], 16))
         if properties['titlecase']:
-            properties['titlecase'] = unichr(int(properties['titlecase'], 16))
+            properties['titlecase'] = chr(int(properties['titlecase'], 16))
 
         properties['combining'] = int(properties['combining'])
         properties['mirrored'] = properties['mirrored']=='Y'
@@ -288,7 +280,7 @@ def get_unihan_properties_internal(ch):
                 continue
             char, key, value = line.strip().split('\t')
             if int(char[2:], 16) == ch:
-                properties[key] = unicode(value, 'utf-8')
+                properties[key] = value.decode('utf-8')
             elif int(char[2:], 16)>ch:
                 break
     return properties
@@ -303,20 +295,21 @@ def get_unihan_properties_zgrep(ch):
             grepcmd = 'zgrep'
         elif f.endswith('.bz2'):
             grepcmd = 'bzgrep'
+        elif f.endswith('.xz'):
+            grepcmd = 'xzgrep'
         else:
             grepcmd = 'grep'
         cmdline = grepcmd+' ^'+chs+r'\\b '+f
         status, output = cmd.getstatusoutput(cmdline)
+        if not PY3:
+            output = unicode(output, 'utf-8')
         output = output.split('\n')
         for l in output:
             if not l:
                 continue
             char, key, value = l.strip().split('\t')
             if int(char[2:], 16) == ch:
-                if PY3:
-                    properties[key] = value
-                else:
-                    properties[key] = unicode(value, 'utf-8')
+                properties[key] = value
             elif int(char[2:], 16)>ch:
                 break
     return properties
@@ -341,33 +334,40 @@ def get_gzip_filename(fname):
         return fname+'.gz'
     if os.path.exists(fname+'.bz2') and bz2 is not None:
         return fname+'.bz2'
+    if os.path.exists(fname+'.xz') and lzma is not None:
+        return fname+'.xz'
+
     return None
 
 
 def OpenGzip(fname):
     "open fname, try fname.gz or fname.bz2 if fname does not exist, return file object or GzipFile or BZ2File object"
-    if os.path.exists(fname) and not (fname.endswith('.gz') or fname.endswith('.bz2')):
-        return open(fname)
-    if os.path.exists(fname+'.gz'):
-        fname = fname+'.gz'
-    elif os.path.exists(fname+'.bz2') and bz2 is not None:
-        fname = fname+'.bz2'
+    fname = get_gzip_filename(fname)
+    fo = None
+    if not fname:
+        return None
     if fname.endswith('.gz'):
-        return gzip.GzipFile(fname)
+        fo = gzip.GzipFile(fname)
     elif fname.endswith('.bz2'):
-        return bz2.BZ2File(fname)
-    return None
+        fo = bz2.BZ2File(fname)
+    elif fname.endswith('.xz'):
+        fo = lzma.open(fname)
+    else:
+        return open(fname)
+    if fo:
+        if PY3:
+            fo = io.TextIOWrapper(fo, encoding='utf-8')
+        return fo
 
-def GrepInNames(pattern, fillcache=False):
-    p = re.compile(pattern, re.I)
+def GrepInNames(pattern, prefill_cache=False):
+    pat = re.compile(pattern, re.I)
     f = None
     for name in UnicodeDataFileNames:
         f = OpenGzip(name)
         if f != None:
             break
-    if not fillcache:
-        if not f:
-            out( """
+    if not f:
+        out( """
 Cannot find UnicodeData.txt, please place it into 
 /usr/share/unidata/UnicodeData.txt,
 /usr/share/unicode/UnicodeData.txt, ~/.unicode/ or current 
@@ -375,59 +375,54 @@ working directory (optionally you can gzip it).
 Without the file, searching will be much slower.
 
 """ )
-            for i in xrange(sys.maxunicode):
-                try:
-                    name = unicodedata.name(unichr(i))
-                    if re.search(p, name):
-                        yield myunichr(i)
-                except ValueError:
-                    pass
-        else:
+
+    if prefill_cache:
+        if f:
             for l in f:
-                if re.search(p, l):
+                if pat.search(l):
                     r = myunichr(int(l.split(';')[0], 16))
                     linecache[r] = l
-                    yield r
             f.close()
     else:
         if f:
             for l in f:
-                if re.search(p, l):
+                if pat.search(l):
                     r = myunichr(int(l.split(';')[0], 16))
                     linecache[r] = l
+                    yield r
             f.close()
- 
+        else:
+            for i in range(sys.maxunicode):
+                try:
+                    name = unicodedata.name(chr(i))
+                    if pat.search(name):
+                        yield myunichr(i)
+                except ValueError:
+                    pass
 
 def valfromcp(n, cp=None):
-    "if fromcp is defined, then the 'n' is considered to be from that codepage and is converted accordingly"
+    "if cp is defined, then the 'n' is considered to be from that codepage and is converted accordingly"
+    "the output is a list of codepoints (integers)"
     if cp:
         xh = '%x' %n
         if len(xh) % 2: # pad hexadecimal representation with a zero
             xh = '0'+xh
         cps = ( [xh[i:i+2] for i in range(0,len(xh),2)] )
-        cps = ( chr(int(i, 16)) for i in cps)
-        cps = ''.join(cps)
-        """
-        if 0 <= n <= 255:
-            s = chr(n)
-        elif 256 <= n <= 65535:
-            s = struct.pack('>H', n)
-        elif 65536 <= n <= sys.maxint:
-            s = struct.pack('>H', n)
-        else: # bad character code, either negative or too big
-            raise ValueError("Bad character code %s" %n)
-        print 'ee',`s`
-        n = unicode(s, cp)
-        """
-        s = unicode(cps, cp)
-        ns = [ord(x) for x in s]
-        return ns
+        cps = ( int(i, 16) for i in cps)
+        # we have to use chr_orig (it's original chr for python2) and not 'B'
+        # because of unicode_literals it will be unicode, which
+        # is not permitted in struct.pack in python2.6
+        cps = ( struct.pack(chr_orig(0x42),i) for i in cps ) # this works in both python3 and python2, unlike bytes([i])
+        cps = b''.join(cps)
+        cps = cps.decode(cp)
+        cps = [ord(x) for x in cps]
+        return cps
     else:
         return [n]
 
 def myunichr(n):
     try:
-        r = unichr(n)
+        r = chr(n)
         return r
     except OverflowError:
         traceback.print_exc()
@@ -480,7 +475,7 @@ def guesstype(arg):
     else:
         return 'string', arg
 
-def process(arglist, t, fromcp=None):
+def process(arglist, t, fromcp=None, prefill_cache=False):
     # build a list of values, so that we can combine queries like
     # LATIN ALPHA and search for LATIN.*ALPHA and not names that
     # contain either LATIN or ALPHA
@@ -502,46 +497,36 @@ def process(arglist, t, fromcp=None):
             vals = valfromcp(val, fromcp)
             for val in vals:
                 r = myunichr(val)
-                list(GrepInNames('%04X'%val, fillcache=True)) # fill the table with character properties
                 result.append(r)
         elif tp=='decimal':
             val = int(arg, 10)
             vals = valfromcp(val, fromcp)
             for val in vals:
                 r = myunichr(val)
-                list(GrepInNames('%04X'%val, fillcache=True)) # fill the table with character properties
                 result.append(r)
         elif tp=='octal':
             val = int(arg, 8)
             vals = valfromcp(val, fromcp)
             for val in vals:
                 r = myunichr(val)
-                list(GrepInNames('%04X'%val, fillcache=True)) # fill the table with character properties
                 result.append(r)
         elif tp=='binary':
             val = int(arg, 2)
             vals = valfromcp(val, fromcp)
             for val in vals:
                 r = myunichr(val)
-                list(GrepInNames('%04X'%val, fillcache=True)) # fill the table with character properties
                 result.append(r)
         elif tp=='regexp':
             names_query.append(arg)
         elif tp=='string':
-            try:
-                if PY3: # argv is automatically decoded into unicode, even padded with bogus character if it is not encodable
-                    unirepr = arg
-                else:
-                    unirepr = unicode(arg, options.iocharset)
-            except UnicodeDecodeError:
-                error ("Sequence %s is not valid in charset '%s'." % (repr(arg),  options.iocharset))
-            unilist = ['%04X'%ord(x) for x in unirepr]
-            unireg = '|'.join(unilist)
-            list(GrepInNames(unireg, fillcache=True))
+            unirepr = arg
             for r in unirepr:
                 result.append(r)
         elif tp=='empty string':
             pass # do not do anything for an empty string
+    if result and prefill_cache:
+        hx = '|'.join('%04X'%ord(x) for x in result)
+        list(GrepInNames(hx, prefill_cache=True))
     if names_query:
         query = '.*'.join(names_query)
         for r in GrepInNames(query):
@@ -566,10 +551,10 @@ def printkv(*l):
         out(k)
         out(": ")
         out(maybe_colours('default'))
-        out(unicode(v))
+        out(str(v))
         out(sep)
 
-def print_characters(clist, maxcount, query_wikipedia=0, query_wiktionary=0):
+def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wiktionary=0):
     """query_wikipedia or query_wiktionary:
             0 - don't
             1 - spawn browser
@@ -578,7 +563,7 @@ def print_characters(clist, maxcount, query_wikipedia=0, query_wiktionary=0):
     for c in clist:
 
         if query_wikipedia or query_wiktionary:
-            ch = urllib.quote(c.encode('utf-8')) # wikipedia uses UTF-8 in names
+            ch = urlquote(c.encode('utf-8')) # wikipedia uses UTF-8 in names
             wiki_base_url = 'http://en.wikipedia.org/wiki/'
             if query_wiktionary:
                 wiki_base_url = 'http://en.wiktionary.org/wiki/'
@@ -586,76 +571,102 @@ def print_characters(clist, maxcount, query_wikipedia=0, query_wiktionary=0):
             webbrowser.open(wiki_url)
             query_wikipedia = query_wiktionary = 0 # query only the very first character
 
-
         if maxcount:
             counter += 1
         if counter > options.maxcount:
             out("\nToo many characters to display, more than %s, use --max option to change it\n" % options.maxcount)
             return
+        for colour_key in colours.keys():
+            locals()[colour_key] = maybe_colours(colour_key)
         properties = get_unicode_properties(c)
         out(maybe_colours('bold'))
-        out('U+%04X '% ord(c)) 
+        ordc = ord(c)
         if properties['name']:
-            out(properties['name'])
+            name = properties['name']
         else:
-            out(maybe_colours('default'))
-            out(" - No such unicode character name in database")
-        out(maybe_colours('default'))
-        out('\n')
+            name = " - No such unicode character name in database"
+        utf8 = ' '.join([("%02x" % ord23(x)) for x in c.encode('utf-8')])
+        utf16be = ''.join([("%02x" % ord23(x)) for x in c.encode('utf-16be')])
+        decimal = "&#%s;" % ordc
 
-        ar = ["UTF-8", ' '.join([("%02x" % ord23(x)) for x in c.encode('utf-8')]) ,
-              "UTF-16BE", ''.join([("%02x" % ord23(x)) for x in c.encode('utf-16be')]),
-              "Decimal", "&#%s;" % ord(c) ]
-        if options.addcharset:
+        addcharset = options.addcharset
+        if addcharset:
             try:
-                rep = ' '.join([("%02x" % ord(x)) for x in c.encode(options.addcharset)] )
+                in_additional_charset = ' '.join([("%02x" % ord23(x)) for x in c.encode(addcharset)] )
             except UnicodeError:
-                rep = "NONE"
-            ar.extend( [options.addcharset, rep] )
-        printkv(*ar)
-
+                in_additional_charset = "NONE"
 
         if properties['combining']:
-            pc = " "+c
+            pchar = " "+c
         else:
-            pc = c
-        out(pc)
+            pchar = c
         uppercase = properties['uppercase']
         lowercase = properties['lowercase']
+        opt_uppercase = opt_lowercase = ''
+        flipcase = None
         if uppercase:
-            out(" (%s)" % uppercase)
-            out('\n')
-            printkv( "Uppercase", 'U+%04X'% ord(properties['uppercase']) )
+            ord_uppercase = ord(properties['uppercase'])
+            opt_uppercase = '\n{green}Uppercase:{default} {ord_uppercase:04X}'.format(**locals())
+            flipcase = uppercase
         elif lowercase:
-            out(" (%s)" % properties['lowercase'])
-            out('\n')
-            printkv( "Lowercase", 'U+%04X'% ord(properties['lowercase']) )
-        else:
-            out('\n')
-        printkv( 'Category', properties['category']+ " (%s)" % general_category[properties['category']] )
+            ord_lowercase = ord(properties['lowercase'])
+            opt_lowercase = '\n{green}Lowercase:{default} {ord_lowercase:04X}'.format(**locals())
+            flipcase = lowercase
+        category = properties['category']
+        category_desc = general_category[category]
 
+        opt_numeric = ''
+        numeric_desc = ''
         if properties['numeric_value']:
-            printkv( 'Numeric value',  properties['numeric_value'])
+            opt_numeric = 'Numeric value: '
+            numeric_desc = properties['numeric_value']+'\n'
+        opt_digit = ''
+        digit_desc = ''
         if properties['digit_value']:
-            printkv( 'Digit value',  properties['digit_value'])
+            opt_digit = 'Digit value: '
+            digit_desc = properties['digit_value']+'\n'
 
+        opt_bidi = ''
+        bidi_desc = ''
         bidi = properties['bidi']
+        bidi_desc = bidi_category.get(bidi, bidi)
         if bidi:
-            printkv( 'Bidi', bidi+ " (%s)" % bidi_category.get(bidi, bidi) )
+            opt_bidi = 'Bidi: '
+            bidi_desc = ' ({0})'.format(bidi_desc)
+        mirrored_desc = ''
         mirrored = properties['mirrored']
         if mirrored:
-            out('Character is mirrored\n')
+            mirrored_desc = 'Character is mirrored\n'
+        opt_combining = ''
         comb = properties['combining']
+        combining_desc = ''
         if comb:
-            printkv( 'Combining', str(comb)+ " (%s)" % (comb_classes.get(comb, '?')) )
+            opt_combining = 'Combining: '
+            combining_desc = "{comb} ({comb_class})\n".format(comb=comb, comb_class=comb_classes.get(comb, '?'))
+
+        opt_decomp = ''
+        decomp_desc = ''
         decomp = properties['decomposition']
         if decomp:
-            printkv( 'Decomposition', decomp )
+            opt_decomp = 'Decomposition: '
+            decomp_desc = decomp+'\n'
+
+        if addcharset:
+            opt_additional = ' {green}{addcharset}:{default} {in_additional_charset}'.format(**locals())
+        else:
+            opt_additional = ''
+        if flipcase:
+            opt_flipcase = ' ({flipcase})'.format(**locals())
+        else:
+            opt_flipcase = ''
+        formatted_output = format_string.format(**locals())
+        out(formatted_output)
+
+
         if options.verbosity>0:
             uhp = get_unihan_properties(c)
             for key in uhp:
                 printkv(key, uhp[key])
-        out('\n')
 
 
 def print_block(block):
@@ -674,11 +685,11 @@ def print_block(block):
             hexi = "     %03X" % i
         out(LTR+hexi+". ")
         for j in range(16):
-            c = unichr(i*16+j)
+            c = chr(i*16+j)
             c_out = c
             if unicodedata.combining(c):
                 c_out = " "+c
-            # fallback for old python (<2.5) without east_asian_width
+            # fallback for python without east_asian_width (probably unnecessary, since this script does not work with <2.6 anyway)
             fullwidth = 'east_asian_width' in unicodedata.__dict__ and unicodedata.east_asian_width(c)[0] in 'FW'
             if not fullwidth:
                 c_out = ' '+c_out
@@ -711,7 +722,16 @@ def is_range(s, typ):
     high = high // 256 + 1
     return range(low, high)
 
+def unescape(s):
+    return s.replace(r'\n', '\n')
 
+format_string_default = '''{yellow}{bold}U+{ordc:04X} {name}{default}
+{green}UTF-8:{default} {utf8} {green}UTF-16BE:{default} {utf16be} {green}Decimal:{default} {decimal}{opt_additional}
+{pchar}{opt_flipcase}{opt_uppercase}{opt_lowercase}
+{green}Category:{default} {category} ({category_desc})
+{green}{opt_numeric}{default}{numeric_desc}{green}{opt_digit}{default}{digit_desc}{green}{opt_bidi}{default}{bidi}{bidi_desc}
+{mirrored_desc}{green}{opt_combining}{default}{combining_desc}{green}{opt_decomp}{default}{decomp_desc}
+'''
 
 parser = OptionParser(usage="usage: %prog [options] arg")
 parser.add_option("-x", "--hexadecimal",
@@ -766,14 +786,23 @@ parser.add_option("-w", "--wikipedia",
 parser.add_option("--wt", "--wiktionary",
       action="count", dest="query_wiktionary",
       default=0,
-      help="Query wikipedia for the character")
+      help="Query wiktionary for the character")
 parser.add_option("--list",
       action="store_const", dest="list_all_encodings",
       const=True,
       help="List (approximately) all known encodings")
-
+parser.add_option("--format",
+      action="store", dest="format_string", type="string",
+      default=format_string_default,
+      help="formatting string")
+parser.add_option("--brief",
+      action="store_const", dest="format_string",
+      const='{pchar} U+{ordc:04X} {name}\n',
+      help="Brief format")
 
 (options, arguments) = parser.parse_args()
+format_string = unescape(options.format_string)
+
 
 linecache = {}
 do_init()
@@ -801,9 +830,16 @@ else:
     if sys.platform == 'win32':
         use_colour = False
 
-
 l_args = [] # list of non range arguments to process
 for argum in arguments:
+    if PY3:
+        # in python3, argv is automatically decoded into unicode
+        # but we have to check for surrogates
+        argum = argum.encode(options.iocharset, 'surrogateescape')
+    try:
+        argum = argum.decode(options.iocharset)
+    except UnicodeDecodeError:
+        error ("Sequence %s is not valid in charset '%s'." % (repr(argum),  options.iocharset))
     is_r = is_range(argum, options.type)
     if is_r:
         print_blocks(is_r)
@@ -816,7 +852,7 @@ if l_args:
         unihan_fs = get_unihan_files() # list of file names for Unihan data file(s), empty if not available
         if not unihan_fs:
             out( """
-Unihan_*.txt files not found. In order to view Unihan properties, 
+Unihan_*.txt files not found. In order to view Unihan properties,
 please place the files into /usr/share/unidata/, 
 /usr/share/unicode/, ~/.unicode/
 or current working directory (optionally you can gzip or bzip2 them).
@@ -825,8 +861,6 @@ Warning, listing UniHan Properties is rather slow.
 
 """)
             options.verbosity = 0
-    try:
-        print_characters(process(l_args, options.type, options.fromcp), options.maxcount, options.query_wikipedia, options.query_wiktionary)
-    except IOError: # e.g. broken pipe
-        pass
+    processed_args = process(l_args, options.type, options.fromcp, prefill_cache=True)
+    print_characters(processed_args, options.maxcount, format_string, options.query_wikipedia, options.query_wiktionary)
 

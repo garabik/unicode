@@ -1,23 +1,25 @@
 This file is in UTF-8 encoding.
 
 To use unicode utility, you need: 
- - python >=2.2 (generators are needed), preferrably wide
-   unicode build, 
- - python optparse library (part of python2.3)
+ - python >=2.6 (str format() method is needed), preferrably wide
+   unicode build, however, python3 is recommended
+ - python optparse library (part of since python2.3)
  - UnicodeData.txt file (http://www.unicode.org/Public) which
-   you should put into /usr/share/unicode/, ~/.unicode/ or current working directory.
+   you should put into /usr/share/unicode/, ~/.unicode/ or current
+   working directory.
  - if you want to see UniHan properties, you need also Unihan.txt file
-   which should be put into /usr/share/unicode/, ~./unicode/ or current working directory.
+   which should be put into /usr/share/unicode/, ~./unicode/ or
+   current working directory.
 
 
 Enter regular expression, hexadecimal number or some characters as an
 argument. unicode will try to guess what you want to look up, see the
 manpage if you want to force other behaviour (the manpage is also the
 best documentation). In particular, -r forces searching for regular
-expression in the names of character, -s forces unicode to display 
+expression in the names of character, -s forces unicode to display
 information about the characters given.
 
-Here are just some examples how to use this script:
+Here are just some examples:
 
 $ unicode.py euro
 U+20A0 EURO-CURRENCY SIGN
@@ -72,4 +74,55 @@ $ unicode --fromcp big5 -x aff3
 and multi-char strings are supported, too:
 
 $ unicode --fromcp utf-8 -x c599c3adc5a5
+
+
+On format (--format='...'):
+
+Format string tells unicode which information should be displayed.
+There is one (and only one) escape character recognised, \n for a new line.
+
+You can use standard python .format() syntax. Following variables are
+recognized:
+
+{black} {red} {green} {yellow}
+{blue} {magenta} {cyan} {white}  -- ANSI colours (foreground)
+
+{on_black} {on_red} ...          -- ANSI colours (background)
+
+{no_colour} {default} {bold}
+{underline} {blink} {reverse}
+{concealed}                      -- self-explaining ANSI escape codes
+
+{ordc} -- unicode codepoint of the character (integer)
+{name} -- unicode name of the character
+{utf8} -- utf8 representation of the character (hexadecimal)
+{utf16be} -- utf16 representation of the character (hexadecimal)
+{decimal} -- decimal representation of the character
+{opt_additional} -- optional representation in additional charset (-c); 
+                    empty string if not specified
+{pchar} -- the character itself
+{opt_flipcase} -- upper- or lowercase opposite of the character, in parentheses;
+                  empty if character is not cased
+{opt_uppercase}{opt_lowercase} -- optional string describing uppercase
+                                  or lowercase variant of the character;
+                                  empty if character is not cased
+{category} {category_desc} -- character category and its human readable description
+{opt_numeric}{numeric_desc} -- the string `Numeric value:' and the numeric value
+                               of the character; both empty if the character
+                               has no numeric value
+{opt_digit}{digit_desc} -- the string `Digit value:' and the digit value
+                           of the character; both empty if the character
+                           has no digit value
+{opt_bidi}{bidi}{bidi_desc} -- the string `Bidi:', the bidi property and
+                               a human readable description 
+                               of the bidi property; empty if the character
+                               has no bidi category
+{mirrored_desc} -- the string 'Character is mirrored' if the character is mirrored,
+                   empty otherwise
+{opt_combining}{combining_desc} -- the string `Combining: ', combining class and a
+                                   human readable description of the combining class;
+                                   empty if the character is not combining
+{opt_decomp}{decomp_desc} -- the string `Decomposition: ' and a hexadecimal sequence
+                             of decomposition characters; empty if the character
+                             has no decomposition
 
