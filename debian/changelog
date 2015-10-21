@@ -5,8 +5,9 @@ unicode (1) unstable; urgency=low
   * drop old python2.5 compatibility
   * implement --brief (closes: #708318)
   * implement --format (closes: #605642)
+  * update Debian packaging
 
- -- Radovan Garabík <garabik@kassiopeia.juls.savba.sk>  Mon, 05 Oct 2015 21:20:31 +0200
+ -- Radovan Garabík <garabik@kassiopeia.juls.savba.sk>  Wed, 21 Oct 2015 20:50:31 +0200
 
 unicode (0.9.9) unstable; urgency=low
 

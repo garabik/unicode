@@ -7,7 +7,8 @@ import os, glob, sys, unicodedata, locale, gzip, re, traceback, encodings
 import webbrowser, textwrap, struct
 
 
-# bz2 was introduced in 2.3, we want this to work also with earlier versions
+# bz2 was introduced in 2.3, but we want this to work even if for some
+# reason it is not available
 try:
     import bz2
 except ImportError:
