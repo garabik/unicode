@@ -29,9 +29,11 @@ configure-stamp:
 	touch configure-stamp
 
 
-build: build-stamp
+build: build-arch build-indep
+build-arch: build-stamp
+build-indep: build-stamp
 
-build-stamp: configure-stamp 
+build-stamp: configure-stamp
 	dh_testdir
 
 	# Add here commands to compile the package.
@@ -68,7 +70,7 @@ install: build
 binary-indep: build install
 	dh_testdir
 	dh_testroot
-#	dh_installdebconf	
+#	dh_installdebconf
 	dh_installdocs
 #	dh_installexamples
 #	dh_installmenu
@@ -81,7 +83,7 @@ binary-indep: build install
 	dh_installman unicode.1 paracode.1
 #	dh_installinfo
 #	dh_undocumented
-	dh_installchangelogs 
+	dh_installchangelogs
 #	dh_link
 	dh_strip
 	dh_compress
@@ -97,3 +99,4 @@ binary-indep: build install
 
 binary: binary-indep binary-arch
 .PHONY: build clean binary-indep binary-arch binary install configure
+
