@@ -3,11 +3,11 @@ Section: utils
 Priority: optional
 Maintainer: Radovan Garabík <garabik@kassiopeia.juls.savba.sk>
 Build-Depends: debhelper (>= 4)
-Standards-Version: 3.8.0
+Standards-Version: 3.9.4
 
 Package: unicode
 Architecture: all
-Depends: python (>= 2.3), ${misc:Depends}
+Depends: ${misc:Depends}, ${python:Depends}
 Recommends: unicode-data
 Description: display unicode character properties
  unicode is a simple command line utility that displays
