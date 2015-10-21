@@ -1,4 +1,4 @@
-unicode (1) unstable; urgency=low
+unicode (2) unstable; urgency=low
 
   * new version, completely reworked formatting
   * full python3 support
@@ -9,7 +9,7 @@ unicode (1) unstable; urgency=low
 
  -- Radovan Garabík <garabik@kassiopeia.juls.savba.sk>  Wed, 21 Oct 2015 20:50:31 +0200
 
-unicode (0.9.9) unstable; urgency=low
+unicode (1) unstable; urgency=low
 
   * added --wt to query wiktionary
   * fix (somewhat) tabular display of fullwidth characters;
