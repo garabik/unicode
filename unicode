@@ -580,7 +580,6 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
         for colour_key in colours.keys():
             locals()[colour_key] = maybe_colours(colour_key)
         properties = get_unicode_properties(c)
-        out(maybe_colours('bold'))
         ordc = ord(c)
         if properties['name']:
             name = properties['name']
@@ -796,7 +795,7 @@ parser.add_option("--format",
       action="store", dest="format_string", type="string",
       default=format_string_default,
       help="formatting string")
-parser.add_option("--brief",
+parser.add_option("--brief", "--terse",
       action="store_const", dest="format_string",
       const='{pchar} U+{ordc:04X} {name}\n',
       help="Brief format")
