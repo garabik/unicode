@@ -588,6 +588,7 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
         utf8 = ' '.join([("%02x" % ord23(x)) for x in c.encode('utf-8')])
         utf16be = ''.join([("%02x" % ord23(x)) for x in c.encode('utf-16be')])
         decimal = "&#%s;" % ordc
+        octal = "\\%o" % ordc
 
         addcharset = options.addcharset
         if addcharset:
@@ -726,7 +727,7 @@ def unescape(s):
     return s.replace(r'\n', '\n')
 
 format_string_default = '''{yellow}{bold}U+{ordc:04X} {name}{default}
-{green}UTF-8:{default} {utf8} {green}UTF-16BE:{default} {utf16be} {green}Decimal:{default} {decimal}{opt_additional}
+{green}UTF-8:{default} {utf8} {green}UTF-16BE:{default} {utf16be} {green}Decimal:{default} {decimal} {green}Octal:{default} {octal}{opt_additional}
 {pchar}{opt_flipcase}{opt_uppercase}{opt_lowercase}
 {green}Category:{default} {category} ({category_desc})
 {green}{opt_numeric}{default}{numeric_desc}{green}{opt_digit}{default}{digit_desc}{green}{opt_bidi}{default}{bidi}{bidi_desc}
