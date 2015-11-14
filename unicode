@@ -588,7 +588,7 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
         utf8 = ' '.join([("%02x" % ord23(x)) for x in c.encode('utf-8')])
         utf16be = ''.join([("%02x" % ord23(x)) for x in c.encode('utf-16be')])
         decimal = "&#%s;" % ordc
-        octal = "\\%o" % ordc
+        octal = "\\0%o" % ordc
 
         addcharset = options.addcharset
         if addcharset:
