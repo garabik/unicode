@@ -1,3 +1,12 @@
+unicode (2.1) unstable; urgency=low
+
+  * add octal character code
+  * fix crash when displaying numeric and digit properties from internal
+    python database (closes: #810927)
+  * fix default unicodedata path(s)
+
+ -- Radovan Garabík <garabik@kassiopeia.juls.savba.sk>  Thu, 14 Jan 2016 17:24:58 +0100
+
 unicode (2) unstable; urgency=low
 
   * new version, completely reworked formatting
