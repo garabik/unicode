@@ -235,12 +235,12 @@ def get_unicode_properties(ch):
         properties['combining'] = unicodedata.combining(ch)
         properties['bidi'] = unicodedata.bidirectional(ch)
         properties['decomposition'] = unicodedata.decomposition(ch)
-        properties['digit_value'] = unicodedata.digit(ch, '')
-        properties['numeric_value'] = unicodedata.numeric(ch, '')
+        properties['digit_value'] = str(unicodedata.digit(ch, ''))
+        properties['numeric_value'] = str(unicodedata.numeric(ch, ''))
         properties['mirrored'] = unicodedata.mirrored(ch)
         properties['unicode1name'] = ''
         properties['iso_comment'] = ''
-        properties['uppercase'] = ch.upper()
+        properties['uppercase'] = ch.upper() # this is not correct
         properties['lowercase'] = ch.lower()
         properties['titlecase'] = ''
     return properties
