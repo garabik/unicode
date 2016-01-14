@@ -45,7 +45,7 @@ Decomposition: 0041 0300
 
 
 
-You can specify a range of characters as argumets, unicode will show
+You can specify a range of characters as arguments, unicode will show
 these characters in nice tabular format, aligned to 256-byte boundaries.  
 Use two dots ".." to indicate the range, e.g.
 
