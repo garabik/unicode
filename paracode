@@ -182,14 +182,14 @@ table_default.update(table_greek)
 table_all={}
 for t in tables_names:
     table_all.update(globals()['table_'+t])
-    
+
 parser = OptionParser(usage="usage: %prog [options]")
 
 parser.add_option("-t", "--tables",
     action="store", default='default', dest="tables", type="string",
-    help="""list of tables to use, separated by a plus sign. 
-Possible tables are: """+'+'.join(tables_names)+"""  and a special name 'all' to specify 
-all these tables joined together. 
+    help="""list of tables to use, separated by a plus sign.
+Possible tables are: """+'+'.join(tables_names)+"""  and a special name 'all' to specify
+all these tables joined together.
 There is another table, 'mirror', that is not selected in 'all'.""")
 
 parser.add_option("-r", "--reverse",

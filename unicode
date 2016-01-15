@@ -369,9 +369,9 @@ def GrepInNames(pattern, prefill_cache=False):
             break
     if not f:
         out( """
-Cannot find UnicodeData.txt, please place it into 
+Cannot find UnicodeData.txt, please place it into
 /usr/share/unidata/UnicodeData.txt,
-/usr/share/unicode/UnicodeData.txt, ~/.unicode/ or current 
+/usr/share/unicode/UnicodeData.txt, ~/.unicode/ or current
 working directory (optionally you can gzip it).
 Without the file, searching will be much slower.
 
@@ -488,7 +488,7 @@ def process(arglist, t, fromcp=None, prefill_cache=False):
             if tp == 'regexp':
                 # if the first argument is guessed to be a regexp, add
                 # all the following arguments to the regular expression -
-                # this is probably what you wanted, e.g. 
+                # this is probably what you wanted, e.g.
                 # 'unicode cyrillic be' will now search for the 'cyrillic.*be' regular expression
                 t = 'regexp'
         else:
@@ -736,13 +736,13 @@ format_string_default = '''{yellow}{bold}U+{ordc:04X} {name}{default}
 
 parser = OptionParser(usage="usage: %prog [options] arg")
 parser.add_option("-x", "--hexadecimal",
-      action="store_const", const='hexadecimal', dest="type", 
+      action="store_const", const='hexadecimal', dest="type",
       help="Assume arg to be hexadecimal number")
 parser.add_option("-o", "--octal",
-      action="store_const", const='octal', dest="type", 
+      action="store_const", const='octal', dest="type",
       help="Assume arg to be octal number")
 parser.add_option("-b", "--binary",
-      action="store_const", const='binary', dest="type", 
+      action="store_const", const='binary', dest="type",
       help="Assume arg to be binary number")
 parser.add_option("-d", "--decimal",
       action="store_const", const='decimal', dest="type",
@@ -854,7 +854,7 @@ if l_args:
         if not unihan_fs:
             out( """
 Unihan_*.txt files not found. In order to view Unihan properties,
-please place the files into /usr/share/unidata/, 
+please place the files into /usr/share/unidata/,
 /usr/share/unicode/, ~/.unicode/
 or current working directory (optionally you can gzip or bzip2 them).
 You can get the files by unpacking ftp://ftp.unicode.org/Public/UNIDATA/Unihan.zip
