@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import os, glob, sys, unicodedata, locale, gzip, re, traceback, encodings
 import webbrowser, textwrap, struct
-
+from pprint import pprint
 
 # bz2 was introduced in 2.3, but we want this to work even if for some
 # reason it is not available
@@ -209,6 +209,37 @@ comb_classes = {
       240: 'Below (iota subscript)',
 }
 
+def get_unicode_blocks_descriptions():
+    "parses Blocks.txt"
+    unicodeblocks = {} # (low, high): 'desc'
+    f = None
+    for name in UnicodeBlocksFiles:
+        f = OpenGzip(name)
+        if f:
+            break
+    if not f:
+        return {}
+    for line in f:
+        if line.startswith('#') or ';' not in line or '..' not in line:
+            continue
+        ran, desc = line.split(';')
+        desc = desc.strip()
+        low, high = ran.split('..')
+        low = int(low, 16)
+        high = int(high, 16)
+        unicodeblocks[ (low,high) ] = desc
+    return unicodeblocks
+
+unicodeblocks = None
+def get_unicode_block(ch):
+    "return start_of_block, end_of_block, block_name"
+    global unicodeblocks
+    if unicodeblocks is None:
+        unicodeblocks = get_unicode_blocks_descriptions()
+    ch = ord(ch)
+    for low, high in unicodeblocks.keys():
+        if low<=ch<=high:
+            return low, high, unicodeblocks[ (low,high) ]
 
 def get_unicode_properties(ch):
     properties = {}
@@ -258,7 +289,8 @@ def do_init():
     HomeUnihanData = os.path.join(HomeDir, "Unihan*")
     global UnihanDataGlobs
     UnihanDataGlobs = [HomeUnihanData, '/usr/share/unidata/Unihan*', '/usr/share/unicode-data/Unihan*', '/usr/share/unicode/Unihan*', './Unihan*']
-
+    global UnicodeBlocksFiles
+    UnicodeBlocksFiles = ['/usr/share/unicode/Blocks.txt', '/usr/share/unicode-data/Blocks.txt', '/usr/share/unidata/Blocks.txt', './Blocks.txt']
 
 def get_unihan_files():
     fos = [] # list of file names for Unihan data file(s)
@@ -411,7 +443,7 @@ def valfromcp(n, cp=None):
         cps = ( [xh[i:i+2] for i in range(0,len(xh),2)] )
         cps = ( int(i, 16) for i in cps)
         # we have to use chr_orig (it's original chr for python2) and not 'B'
-        # because of unicode_literals it will be unicode, which
+        # because unicode_literals it will be unicode, which
         # is not permitted in struct.pack in python2.6
         cps = ( struct.pack(chr_orig(0x42),i) for i in cps ) # this works in both python3 and python2, unlike bytes([i])
         cps = b''.join(cps)
@@ -652,6 +684,14 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
             opt_decomp = 'Decomposition: '
             decomp_desc = decomp+'\n'
 
+        opt_unicode_block = ''
+        opt_unicode_block_desc = ''
+        unicode_block = get_unicode_block(c)
+        if unicode_block:
+            low, high, desc = unicode_block
+            opt_unicode_block = 'Unicode block: '
+            opt_unicode_block_desc = "{low:04X}..{high:04X}; {desc}\n".format(low=low,high=high,desc=desc)
+
         if addcharset:
             opt_additional = ' {green}{addcharset}:{default} {in_additional_charset}'.format(**locals())
         else:
@@ -730,7 +770,7 @@ format_string_default = '''{yellow}{bold}U+{ordc:04X} {name}{default}
 {green}UTF-8:{default} {utf8} {green}UTF-16BE:{default} {utf16be} {green}Decimal:{default} {decimal} {green}Octal:{default} {octal}{opt_additional}
 {pchar}{opt_flipcase}{opt_uppercase}{opt_lowercase}
 {green}Category:{default} {category} ({category_desc})
-{green}{opt_numeric}{default}{numeric_desc}{green}{opt_digit}{default}{digit_desc}{green}{opt_bidi}{default}{bidi}{bidi_desc}
+{green}{opt_unicode_block}{default}{opt_unicode_block_desc}{opt_numeric}{default}{numeric_desc}{green}{opt_digit}{default}{digit_desc}{green}{opt_bidi}{default}{bidi}{bidi_desc}
 {mirrored_desc}{green}{opt_combining}{default}{combining_desc}{green}{opt_decomp}{default}{decomp_desc}
 '''
 
