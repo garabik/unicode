@@ -182,68 +182,71 @@ table_default.update(table_greek)
 table_all={}
 for t in tables_names:
     table_all.update(globals()['table_'+t])
-    
-parser = OptionParser(usage="usage: %prog [options]")
 
-parser.add_option("-t", "--tables",
-    action="store", default='default', dest="tables", type="string",
-    help="""list of tables to use, separated by a plus sign. 
-Possible tables are: """+'+'.join(tables_names)+"""  and a special name 'all' to specify 
-all these tables joined together. 
-There is another table, 'mirror', that is not selected in 'all'.""")
+def main():
+    parser = OptionParser(usage="usage: %prog [options]")
 
-parser.add_option("-r", "--reverse",
-      action="count", dest="reverse",
-      default=0,
-      help="Reverse the text after conversion. Best used with the 'mirror' table.")
+    parser.add_option("-t", "--tables",
+        action="store", default='default', dest="tables", type="string",
+        help="""list of tables to use, separated by a plus sign.
+    Possible tables are: """+'+'.join(tables_names)+"""  and a special name 'all' to specify
+    all these tables joined together.
+    There is another table, 'mirror', that is not selected in 'all'.""")
 
-(options, args) = parser.parse_args()
+    parser.add_option("-r", "--reverse",
+          action="count", dest="reverse",
+          default=0,
+          help="Reverse the text after conversion. Best used with the 'mirror' table.")
 
-if args:
-    to_convert = ' '.join(args).decode('utf-8')
-else:
-    to_convert = None
+    (options, args) = parser.parse_args()
 
-tables = options.tables.split('+')
-tables = ['table_'+x for x in tables]
-
-tables = [globals()[x] for x in tables]
-
-table = {}
-for t in tables:
-    table.update(t)
-
-def reverse_string(s):
-    l = list(s)
-    l.reverse()
-    r = ''.join(l)
-    return r
-
-def do_convert(s, reverse=0):
-    if reverse:
-        s = reverse_string(s)
-    l = unicodedata.normalize('NFKD', s)
-    out = []
-    for c in l:
-        out.append(table.get(c, c))
-    out = ''.join(out)
-    out = unicodedata.normalize('NFKC', out)
-    return out
-
-if not to_convert:
-    if options.reverse:
-        lines = sys.stdin.readlines()
-        lines.reverse()
+    if args:
+        to_convert = ' '.join(args).decode('utf-8')
     else:
-        lines = sys.stdin
+        to_convert = None
 
-    for line in lines:
-        l = decode(line, 'utf-8')
-        out = do_convert(l, options.reverse)
+    tables = options.tables.split('+')
+    tables = ['table_'+x for x in tables]
+
+    tables = [globals()[x] for x in tables]
+
+    table = {}
+    for t in tables:
+        table.update(t)
+
+    def reverse_string(s):
+        l = list(s)
+        l.reverse()
+        r = ''.join(l)
+        return r
+
+    def do_convert(s, reverse=0):
+        if reverse:
+            s = reverse_string(s)
+        l = unicodedata.normalize('NFKD', s)
+        out = []
+        for c in l:
+            out.append(table.get(c, c))
+        out = ''.join(out)
+        out = unicodedata.normalize('NFKC', out)
+        return out
+
+    if not to_convert:
+        if options.reverse:
+            lines = sys.stdin.readlines()
+            lines.reverse()
+        else:
+            lines = sys.stdin
+
+        for line in lines:
+            l = decode(line, 'utf-8')
+            out = do_convert(l, options.reverse)
+            sys.stdout.write(encode(out, 'utf-8'))
+
+    else:
+        out = do_convert(to_convert, options.reverse)
         sys.stdout.write(encode(out, 'utf-8'))
+        sys.stdout.write('\n')
 
-else:
-    out = do_convert(to_convert, options.reverse)
-    sys.stdout.write(encode(out, 'utf-8'))
-    sys.stdout.write('\n')
-
+if __name__ == '__main__':
+    main()

@@ -401,9 +401,9 @@ def GrepInNames(pattern, prefill_cache=False):
             break
     if not f:
         out( """
-Cannot find UnicodeData.txt, please place it into 
+Cannot find UnicodeData.txt, please place it into
 /usr/share/unidata/UnicodeData.txt,
-/usr/share/unicode/UnicodeData.txt, ~/.unicode/ or current 
+/usr/share/unicode/UnicodeData.txt, ~/.unicode/ or current
 working directory (optionally you can gzip it).
 Without the file, searching will be much slower.
 
@@ -520,7 +520,7 @@ def process(arglist, t, fromcp=None, prefill_cache=False):
             if tp == 'regexp':
                 # if the first argument is guessed to be a regexp, add
                 # all the following arguments to the regular expression -
-                # this is probably what you wanted, e.g. 
+                # this is probably what you wanted, e.g.
                 # 'unicode cyrillic be' will now search for the 'cyrillic.*be' regular expression
                 t = 'regexp'
         else:
@@ -774,134 +774,137 @@ format_string_default = '''{yellow}{bold}U+{ordc:04X} {name}{default}
 {mirrored_desc}{green}{opt_combining}{default}{combining_desc}{green}{opt_decomp}{default}{decomp_desc}
 '''
 
-parser = OptionParser(usage="usage: %prog [options] arg")
-parser.add_option("-x", "--hexadecimal",
-      action="store_const", const='hexadecimal', dest="type", 
-      help="Assume arg to be hexadecimal number")
-parser.add_option("-o", "--octal",
-      action="store_const", const='octal', dest="type", 
-      help="Assume arg to be octal number")
-parser.add_option("-b", "--binary",
-      action="store_const", const='binary', dest="type", 
-      help="Assume arg to be binary number")
-parser.add_option("-d", "--decimal",
-      action="store_const", const='decimal', dest="type",
-      help="Assume arg to be decimal number")
-parser.add_option("-r", "--regexp",
-      action="store_const", const='regexp', dest="type",
-      help="Assume arg to be regular expression")
-parser.add_option("-s", "--string",
-      action="store_const", const='string', dest="type",
-      help="Assume arg to be a sequence of characters")
-parser.add_option("-a", "--auto",
-      action="store_const", const=None, dest="type",
-      help="Try to guess arg type (default)")
-parser.add_option("-m", "--max",
-      action="store", default=10, dest="maxcount", type="int",
-      help="Maximal number of codepoints to display, default: 10; 0=unlimited")
-parser.add_option("-i", "--io",
-      action="store", default=iocharsetguess, dest="iocharset", type="string",
-      help="I/O character set, I am guessing %s" % iocharsetguess)
-parser.add_option("--fcp", "--fromcp",
-      action="store", default='', dest="fromcp", type="string",
-      help="Convert numerical arguments from this encoding, default: no conversion")
-parser.add_option("-c", "--charset-add",
-      action="store", dest="addcharset", type="string",
-      help="Show hexadecimal reprezentation in this additional charset")
-parser.add_option("-C", "--colour",
-      action="store", dest="use_colour", type="string",
-      default="auto",
-      help="Use colours, on, off or auto")
-parser.add_option('', "--color",
-      action="store", dest="use_colour", type="string",
-      default="auto",
-      help="synonym for --colour")
-parser.add_option("-v", "--verbose",
-      action="count", dest="verbosity",
-      default=0,
-      help="Increase verbosity (reads Unihan properties - slow!)")
-parser.add_option("-w", "--wikipedia",
-      action="count", dest="query_wikipedia",
-      default=0,
-      help="Query wikipedia for the character")
-parser.add_option("--wt", "--wiktionary",
-      action="count", dest="query_wiktionary",
-      default=0,
-      help="Query wiktionary for the character")
-parser.add_option("--list",
-      action="store_const", dest="list_all_encodings",
-      const=True,
-      help="List (approximately) all known encodings")
-parser.add_option("--format",
-      action="store", dest="format_string", type="string",
-      default=format_string_default,
-      help="formatting string")
-parser.add_option("--brief", "--terse",
-      action="store_const", dest="format_string",
-      const='{pchar} U+{ordc:04X} {name}\n',
-      help="Brief format")
+def main():
+    parser = OptionParser(usage="usage: %prog [options] arg")
+    parser.add_option("-x", "--hexadecimal",
+          action="store_const", const='hexadecimal', dest="type",
+          help="Assume arg to be hexadecimal number")
+    parser.add_option("-o", "--octal",
+          action="store_const", const='octal', dest="type",
+          help="Assume arg to be octal number")
+    parser.add_option("-b", "--binary",
+          action="store_const", const='binary', dest="type",
+          help="Assume arg to be binary number")
+    parser.add_option("-d", "--decimal",
+          action="store_const", const='decimal', dest="type",
+          help="Assume arg to be decimal number")
+    parser.add_option("-r", "--regexp",
+          action="store_const", const='regexp', dest="type",
+          help="Assume arg to be regular expression")
+    parser.add_option("-s", "--string",
+          action="store_const", const='string', dest="type",
+          help="Assume arg to be a sequence of characters")
+    parser.add_option("-a", "--auto",
+          action="store_const", const=None, dest="type",
+          help="Try to guess arg type (default)")
+    parser.add_option("-m", "--max",
+          action="store", default=10, dest="maxcount", type="int",
+          help="Maximal number of codepoints to display, default: 10; 0=unlimited")
+    parser.add_option("-i", "--io",
+          action="store", default=iocharsetguess, dest="iocharset", type="string",
+          help="I/O character set, I am guessing %s" % iocharsetguess)
+    parser.add_option("--fcp", "--fromcp",
+          action="store", default='', dest="fromcp", type="string",
+          help="Convert numerical arguments from this encoding, default: no conversion")
+    parser.add_option("-c", "--charset-add",
+          action="store", dest="addcharset", type="string",
+          help="Show hexadecimal reprezentation in this additional charset")
+    parser.add_option("-C", "--colour",
+          action="store", dest="use_colour", type="string",
+          default="auto",
+          help="Use colours, on, off or auto")
+    parser.add_option('', "--color",
+          action="store", dest="use_colour", type="string",
+          default="auto",
+          help="synonym for --colour")
+    parser.add_option("-v", "--verbose",
+          action="count", dest="verbosity",
+          default=0,
+          help="Increase verbosity (reads Unihan properties - slow!)")
+    parser.add_option("-w", "--wikipedia",
+          action="count", dest="query_wikipedia",
+          default=0,
+          help="Query wikipedia for the character")
+    parser.add_option("--wt", "--wiktionary",
+          action="count", dest="query_wiktionary",
+          default=0,
+          help="Query wiktionary for the character")
+    parser.add_option("--list",
+          action="store_const", dest="list_all_encodings",
+          const=True,
+          help="List (approximately) all known encodings")
+    parser.add_option("--format",
+          action="store", dest="format_string", type="string",
+          default=format_string_default,
+          help="formatting string")
+    parser.add_option("--brief", "--terse",
+          action="store_const", dest="format_string",
+          const='{pchar} U+{ordc:04X} {name}\n',
+          help="Brief format")
 
-(options, arguments) = parser.parse_args()
-format_string = unescape(options.format_string)
-
-
-linecache = {}
-do_init()
+    (options, arguments) = parser.parse_args()
+    format_string = unescape(options.format_string)
 
 
-if options.list_all_encodings:
-    all_encodings = os.listdir(os.path.dirname(encodings.__file__))
-    all_encodings = set([os.path.splitext(x)[0] for x in all_encodings])
-    all_encodings = list(all_encodings)
-    all_encodings.sort()
-    print (textwrap.fill(' '.join(all_encodings)))
-    sys.exit()
-
-if len(arguments)==0:
-    parser.print_help()
-    sys.exit()
+    linecache = {}
+    do_init()
 
 
-if options.use_colour.lower() in ("on", "1", "true", "yes"):
-    use_colour = True
-elif options.use_colour.lower() in ("off", "0", "false", "no"):
-    use_colour = False
-else:
-    use_colour = sys.stdout.isatty()
-    if sys.platform == 'win32':
+    if options.list_all_encodings:
+        all_encodings = os.listdir(os.path.dirname(encodings.__file__))
+        all_encodings = set([os.path.splitext(x)[0] for x in all_encodings])
+        all_encodings = list(all_encodings)
+        all_encodings.sort()
+        print (textwrap.fill(' '.join(all_encodings)))
+        sys.exit()
+
+    if len(arguments)==0:
+        parser.print_help()
+        sys.exit()
+
+
+    if options.use_colour.lower() in ("on", "1", "true", "yes"):
+        use_colour = True
+    elif options.use_colour.lower() in ("off", "0", "false", "no"):
         use_colour = False
-
-l_args = [] # list of non range arguments to process
-for argum in arguments:
-    if PY3:
-        # in python3, argv is automatically decoded into unicode
-        # but we have to check for surrogates
-        argum = argum.encode(options.iocharset, 'surrogateescape')
-    try:
-        argum = argum.decode(options.iocharset)
-    except UnicodeDecodeError:
-        error ("Sequence %s is not valid in charset '%s'." % (repr(argum),  options.iocharset))
-    is_r = is_range(argum, options.type)
-    if is_r:
-        print_blocks(is_r)
     else:
-        l_args.append(argum)
+        use_colour = sys.stdout.isatty()
+        if sys.platform == 'win32':
+            use_colour = False
 
-if l_args:
-    unihan_fs = []
-    if options.verbosity>0:
-        unihan_fs = get_unihan_files() # list of file names for Unihan data file(s), empty if not available
-        if not unihan_fs:
-            out( """
-Unihan_*.txt files not found. In order to view Unihan properties,
-please place the files into /usr/share/unidata/, 
-/usr/share/unicode/, ~/.unicode/
-or current working directory (optionally you can gzip or bzip2 them).
-You can get the files by unpacking ftp://ftp.unicode.org/Public/UNIDATA/Unihan.zip
-Warning, listing UniHan Properties is rather slow.
+    l_args = [] # list of non range arguments to process
+    for argum in arguments:
+        if PY3:
+            # in python3, argv is automatically decoded into unicode
+            # but we have to check for surrogates
+            argum = argum.encode(options.iocharset, 'surrogateescape')
+        try:
+            argum = argum.decode(options.iocharset)
+        except UnicodeDecodeError:
+            error ("Sequence %s is not valid in charset '%s'." % (repr(argum),  options.iocharset))
+        is_r = is_range(argum, options.type)
+        if is_r:
+            print_blocks(is_r)
+        else:
+            l_args.append(argum)
 
-""")
-            options.verbosity = 0
-    processed_args = process(l_args, options.type, options.fromcp, prefill_cache=True)
-    print_characters(processed_args, options.maxcount, format_string, options.query_wikipedia, options.query_wiktionary)
+    if l_args:
+        unihan_fs = []
+        if options.verbosity>0:
+            unihan_fs = get_unihan_files() # list of file names for Unihan data file(s), empty if not available
+            if not unihan_fs:
+                out( """
+    Unihan_*.txt files not found. In order to view Unihan properties,
+    please place the files into /usr/share/unidata/,
+    /usr/share/unicode/, ~/.unicode/
+    or current working directory (optionally you can gzip or bzip2 them).
+    You can get the files by unpacking ftp://ftp.unicode.org/Public/UNIDATA/Unihan.zip
+    Warning, listing UniHan Properties is rather slow.
 
+    """)
+                options.verbosity = 0
+        processed_args = process(l_args, options.type, options.fromcp, prefill_cache=True)
+        print_characters(processed_args, options.maxcount, format_string, options.query_wikipedia, options.query_wiktionary)
+
+if __name__ == '__main__':
+    main()
