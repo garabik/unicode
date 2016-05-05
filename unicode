@@ -291,6 +291,9 @@ def do_init():
     UnihanDataGlobs = [HomeUnihanData, '/usr/share/unidata/Unihan*', '/usr/share/unicode-data/Unihan*', '/usr/share/unicode/Unihan*', './Unihan*']
     global UnicodeBlocksFiles
     UnicodeBlocksFiles = ['/usr/share/unicode/Blocks.txt', '/usr/share/unicode-data/Blocks.txt', '/usr/share/unidata/Blocks.txt', './Blocks.txt']
+    # cache where grepped unicode properties are kept
+    global linecache
+    linecache = {}
 
 def get_unihan_files():
     fos = [] # list of file names for Unihan data file(s)
@@ -567,7 +570,7 @@ def process(arglist, t, fromcp=None, prefill_cache=False):
     return result
 
 def maybe_colours(colour):
-    if use_colour:
+    if options.use_colour:
         return colours[colour]
     else:
         return ""
@@ -842,13 +845,11 @@ def main():
           const='{pchar} U+{ordc:04X} {name}\n',
           help="Brief format")
 
+    global options
     (options, arguments) = parser.parse_args()
     format_string = unescape(options.format_string)
 
-
-    linecache = {}
     do_init()
-
 
     if options.list_all_encodings:
         all_encodings = os.listdir(os.path.dirname(encodings.__file__))
@@ -864,13 +865,14 @@ def main():
 
 
     if options.use_colour.lower() in ("on", "1", "true", "yes"):
-        use_colour = True
+        # we reuse the options.use_colour, so that we do not need to use another global
+        options.use_colour = True
     elif options.use_colour.lower() in ("off", "0", "false", "no"):
-        use_colour = False
+        options.use_colour = False
     else:
-        use_colour = sys.stdout.isatty()
+        options.use_colour = sys.stdout.isatty()
         if sys.platform == 'win32':
-            use_colour = False
+            options.use_colour = False
 
     l_args = [] # list of non range arguments to process
     for argum in arguments:
