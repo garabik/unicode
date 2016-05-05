@@ -7,7 +7,7 @@ os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
 setup(name='unicode',
       version='0.2',
-      py_modules=['unicode', 'paracode'],
+      scripts=['unicode', 'paracode'],
       entry_points={'console_scripts': [
           'unicode = unicode:main',
           'paracode = paracode:main']},
