@@ -281,7 +281,7 @@ def do_init():
     HomeDir = os.path.expanduser('~/.unicode')
     HomeUnicodeData = os.path.join(HomeDir, "UnicodeData.txt")
     global UnicodeDataFileNames
-    UnicodeDataFileNames = [HomeUnicodeData, '/usr/share/unicode/UnicodeData.txt', '/usr/share/unicode-data/UnicodeData.txt', '/usr/share/unidata/UnicodeData.txt', './UnicodeData.txt'] + \
+    UnicodeDataFileNames = [HomeUnicodeData, '/usr/share/unicode/UnicodeData.txt', '/usr/share/unicode-data/UnicodeData.txt', '/usr/share/unidata/UnicodeData.txt', '/usr/share/unicode/ucd/UnicodeData.txt', './UnicodeData.txt'] + \
         glob.glob('/usr/share/unidata/UnicodeData*.txt') + \
         glob.glob('/usr/share/perl/*/unicore/UnicodeData.txt') + \
         glob.glob('/System/Library/Perl/*/unicore/UnicodeData.txt') # for MacOSX
