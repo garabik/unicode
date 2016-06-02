@@ -7,6 +7,8 @@ To use unicode utility, you need:
  - UnicodeData.txt file (http://www.unicode.org/Public) which
    you should put into /usr/share/unicode/, ~/.unicode/ or current
    working directory.
+    - apt-get install unicode-data  # Debian
+    - dnf install unicode-ucd       # Fedora
  - if you want to see UniHan properties, you need also Unihan.txt file
    which should be put into /usr/share/unicode/, ~./unicode/ or
    current working directory.
