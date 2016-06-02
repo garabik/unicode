@@ -127,4 +127,5 @@ recognized:
 {opt_decomp}{decomp_desc} -- the string `Decomposition: ' and a hexadecimal sequence
                              of decomposition characters; empty if the character
                              has no decomposition
+{opt_unicode_block}{opt_unicode_block_desc} -- the string `Unicode block:', range of the unicode block and description of said unicode block for the given character
 
