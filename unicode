@@ -67,7 +67,7 @@ else: # python2
 
 from optparse import OptionParser
 
-VERSION='2.2'
+VERSION='2.3'
 
 
 # list of terminals that support bidi
