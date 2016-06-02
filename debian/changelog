@@ -1,3 +1,9 @@
+unicode (2.3) unstable; urgency=low
+
+  * convert to setuptools
+
+ -- Radovan Garabík <garabik@kassiopeia.juls.savba.sk>  Thu, 02 Jun 2016 15:47:19 +0200
+
 unicode (2.2) unstable; urgency=low
 
   * display unicode block (thanks to drastus for inspiration)
