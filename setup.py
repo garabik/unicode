@@ -6,7 +6,7 @@ from setuptools import setup
 os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
 setup(name='unicode',
-      version='2.3',
+      version='2.4',
       scripts=['unicode', 'paracode'],
       entry_points={'console_scripts': [
           'unicode = unicode:main',
