@@ -1,3 +1,11 @@
+unicode (2.4) unstable; urgency=medium
+
+  * fix unihan properties listing
+  * don't assume Blocks.txt is in ASCII, fixes crash using python2 and
+    UnicodeData v9.0 (closes: #828020)
+
+ --  Radovan Garabík <garabik@kassiopeia.juls.savba.sk>  Fri, 24 Jun 2016 16:23:05 +0200
+
 unicode (2.3) unstable; urgency=low
 
   * convert to setuptools

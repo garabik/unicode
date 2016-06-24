@@ -2,8 +2,7 @@
 
 from __future__ import unicode_literals
 
-
-import os, glob, sys, unicodedata, locale, gzip, re, traceback, encodings
+import os, glob, sys, unicodedata, locale, gzip, re, traceback, encodings, io, codecs
 import webbrowser, textwrap, struct
 from pprint import pprint
 
@@ -67,7 +66,7 @@ else: # python2
 
 from optparse import OptionParser
 
-VERSION='2.3'
+VERSION='2.4'
 
 
 # list of terminals that support bidi
@@ -389,10 +388,11 @@ def OpenGzip(fname):
     elif fname.endswith('.xz'):
         fo = lzma.open(fname)
     else:
-        return open(fname)
+        fo = io.open(fname, encoding='utf-8')
+        return fo
     if fo:
-        if PY3:
-            fo = io.TextIOWrapper(fo, encoding='utf-8')
+        # we cannot use TextIOWrapper, since it needs read1 method not implemented by gzip|bz2
+        fo = codecs.getreader('utf-8')(fo)
         return fo
 
 def GrepInNames(pattern, prefill_cache=False):
@@ -891,19 +891,20 @@ def main():
             l_args.append(argum)
 
     if l_args:
+        global unihan_fs
         unihan_fs = []
         if options.verbosity>0:
             unihan_fs = get_unihan_files() # list of file names for Unihan data file(s), empty if not available
             if not unihan_fs:
                 out( """
-    Unihan_*.txt files not found. In order to view Unihan properties,
-    please place the files into /usr/share/unidata/,
-    /usr/share/unicode/, ~/.unicode/
-    or current working directory (optionally you can gzip or bzip2 them).
-    You can get the files by unpacking ftp://ftp.unicode.org/Public/UNIDATA/Unihan.zip
-    Warning, listing UniHan Properties is rather slow.
+Unihan_*.txt files not found. In order to view Unihan properties,
+please place the files into /usr/share/unidata/,
+/usr/share/unicode/, ~/.unicode/
+or current working directory (optionally you can gzip or bzip2 them).
+You can get the files by unpacking ftp://ftp.unicode.org/Public/UNIDATA/Unihan.zip
+Warning, listing UniHan Properties is rather slow.
 
-    """)
+""")
                 options.verbosity = 0
         processed_args = process(l_args, options.type, options.fromcp, prefill_cache=True)
         print_characters(processed_args, options.maxcount, format_string, options.query_wikipedia, options.query_wiktionary)
