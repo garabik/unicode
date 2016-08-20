@@ -632,10 +632,16 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
             except UnicodeError:
                 in_additional_charset = "NONE"
 
-        if properties['combining']:
-            pchar = " "+c
+        category = properties['category']
+        category_desc = general_category[category]
+        if category == 'Cc': # control character
+            pchar = ''
         else:
-            pchar = c
+            if properties['combining']:
+                pchar = " "+c
+            else:
+                pchar = c
+
         uppercase = properties['uppercase']
         lowercase = properties['lowercase']
         opt_uppercase = opt_lowercase = ''
@@ -648,8 +654,6 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
             ord_lowercase = ord(properties['lowercase'])
             opt_lowercase = '\n{green}Lowercase:{default} {ord_lowercase:04X}'.format(**locals())
             flipcase = lowercase
-        category = properties['category']
-        category_desc = general_category[category]
 
         opt_numeric = ''
         numeric_desc = ''
