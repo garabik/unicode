@@ -288,8 +288,9 @@ def do_init():
     HomeUnihanData = os.path.join(HomeDir, "Unihan*")
     global UnihanDataGlobs
     UnihanDataGlobs = [HomeUnihanData, '/usr/share/unidata/Unihan*', '/usr/share/unicode-data/Unihan*', '/usr/share/unicode/Unihan*', './Unihan*']
+    HomeUnicodeBlocks = os.path.join(HomeDir, "Blocks.txt")
     global UnicodeBlocksFiles
-    UnicodeBlocksFiles = ['/usr/share/unicode/Blocks.txt', '/usr/share/unicode-data/Blocks.txt', '/usr/share/unidata/Blocks.txt', './Blocks.txt']
+    UnicodeBlocksFiles = [HomeUnicodeBlocks, '/usr/share/unicode/Blocks.txt', '/usr/share/unicode-data/Blocks.txt', '/usr/share/unidata/Blocks.txt', './Blocks.txt']
     # cache where grepped unicode properties are kept
     global linecache
     linecache = {}
