@@ -735,7 +735,10 @@ def print_block(block):
         out(LTR+hexi+". ")
         for j in range(16):
             c = chr(i*16+j)
-            c_out = c
+            if unicodedata.category(c) == 'Cc':
+                c_out = ' '
+            else:
+                c_out = c
             if unicodedata.combining(c):
                 c_out = " "+c
             # fallback for python without east_asian_width (probably unnecessary, since this script does not work with <2.6 anyway)
