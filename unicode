@@ -363,7 +363,7 @@ def error(txt):
     sys.exit(1)
 
 def get_gzip_filename(fname):
-    "return fname, if it does not exist, return fname+.gz, if neither that, fname+bz2, if neither that, return None"
+    "return fname, if it does not exist, return fname+.gz, if neither that, fname+.bz2, if neither that, fname+.xz, if neither that, return None"
     if os.path.exists(fname):
         return fname
     if os.path.exists(fname+'.gz'):
