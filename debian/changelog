@@ -1,3 +1,10 @@
+unicode (2.5) unstable; urgency=low
+
+  * do not display control characters in tabular output
+  * Look for Blocks.txt in ~/.unicode
+
+ -- Radovan Garabík <garabik@kassiopeia.juls.savba.sk>  Sun, 19 Mar 2017 09:52:06 +0100
+
 unicode (2.4) unstable; urgency=medium
 
   * fix unihan properties listing

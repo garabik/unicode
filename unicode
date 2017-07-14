@@ -66,7 +66,7 @@ else: # python2
 
 from optparse import OptionParser
 
-VERSION='2.4'
+VERSION='2.5'
 
 
 # list of terminals that support bidi
@@ -288,8 +288,9 @@ def do_init():
     HomeUnihanData = os.path.join(HomeDir, "Unihan*")
     global UnihanDataGlobs
     UnihanDataGlobs = [HomeUnihanData, '/usr/share/unidata/Unihan*', '/usr/share/unicode-data/Unihan*', '/usr/share/unicode/Unihan*', './Unihan*']
+    HomeUnicodeBlocks = os.path.join(HomeDir, "Blocks.txt")
     global UnicodeBlocksFiles
-    UnicodeBlocksFiles = ['/usr/share/unicode/Blocks.txt', '/usr/share/unicode-data/Blocks.txt', '/usr/share/unidata/Blocks.txt', './Blocks.txt']
+    UnicodeBlocksFiles = [HomeUnicodeBlocks, '/usr/share/unicode/Blocks.txt', '/usr/share/unicode-data/Blocks.txt', '/usr/share/unidata/Blocks.txt', './Blocks.txt']
     # cache where grepped unicode properties are kept
     global linecache
     linecache = {}
@@ -734,7 +735,10 @@ def print_block(block):
         out(LTR+hexi+". ")
         for j in range(16):
             c = chr(i*16+j)
-            c_out = c
+            if unicodedata.category(c) == 'Cc':
+                c_out = ' '
+            else:
+                c_out = c
             if unicodedata.combining(c):
                 c_out = " "+c
             # fallback for python without east_asian_width (probably unnecessary, since this script does not work with <2.6 anyway)

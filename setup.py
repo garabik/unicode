@@ -6,11 +6,11 @@ from setuptools import setup
 os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
 setup(name='unicode',
-      version='2.4',
+      version='2.5',
       scripts=['unicode', 'paracode'],
-      entry_points={'console_scripts': [
-          'unicode = unicode:main',
-          'paracode = paracode:main']},
+#      entry_points={'console_scripts': [
+#          'unicode = unicode:main',
+#          'paracode = paracode:main']},
       description="Display unicode character properties",
       author="Radovan Garabik",
       author_email='radovan.garabik@kassiopeia.juls.savba.sk',

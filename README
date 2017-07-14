@@ -9,8 +9,11 @@ To use unicode utility, you need:
    working directory.
     - apt-get install unicode-data  # Debian
     - dnf install unicode-ucd       # Fedora
+ - if you want to see Unicode block information, you also need
+   Blocks.txt file, which you should put into /usr/share/unicode/,
+   ~/.unicode/ or current working directory.
  - if you want to see UniHan properties, you need also Unihan.txt file
-   which should be put into /usr/share/unicode/, ~./unicode/ or
+   which should be put into /usr/share/unicode/, ~/.unicode/ or
    current working directory.
 
 
