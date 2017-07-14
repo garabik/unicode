@@ -66,7 +66,7 @@ else: # python2
 
 from optparse import OptionParser
 
-VERSION='2.5'
+VERSION='2.6'
 
 
 # list of terminals that support bidi
@@ -492,7 +492,7 @@ def guesstype(arg):
             if val>sys.maxunicode:
                 return 'regexp', arg
             else:
-                return 'hexadecimal', arg
+                return 'hexadecimal', arg[1:]
         except ValueError:
             return 'regexp', arg
     elif len(arg)>=4:
