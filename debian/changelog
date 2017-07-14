@@ -1,3 +1,9 @@
+unicode (2.6) unstable; urgency=low
+
+  * fix crash when using Uxxxx (as opposed to U+xxxx) (closes: #836594)
+
+ -- Radovan Garabík <garabik@kassiopeia.juls.savba.sk>  Fri, 14 Jul 2017 16:41:29 +0200
+
 unicode (2.5) unstable; urgency=low
 
   * do not display control characters in tabular output
