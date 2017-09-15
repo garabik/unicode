@@ -99,6 +99,7 @@ recognized:
 {concealed}                      -- self-explaining ANSI escape codes
 
 {ordc} -- unicode codepoint of the character (integer)
+{identifier} -- unicode identifier of the character (U+xxxx)
 {name} -- unicode name of the character
 {utf8} -- utf8 representation of the character (hexadecimal)
 {utf16be} -- utf16 representation of the character (hexadecimal)
