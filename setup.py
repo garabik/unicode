@@ -27,3 +27,4 @@ setup(name='unicode',
           'Programming Language :: Python :: 3',
           'Topic :: Text Editors :: Text Processing',
           'Topic :: Utilities'])
+
