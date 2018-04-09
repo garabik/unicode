@@ -611,7 +611,7 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
         if maxcount:
             counter += 1
         if counter > options.maxcount:
-            out("\nToo many characters to display, more than %s, use --max option to change it\n" % options.maxcount)
+            out("\nToo many characters to display, more than %s, use --max 0 (or other value) option to change it\n" % options.maxcount)
             return
         for colour_key in colours.keys():
             locals()[colour_key] = maybe_colours(colour_key)
