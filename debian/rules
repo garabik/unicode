@@ -10,17 +10,6 @@
 
 
 
-CFLAGS = -Wall -g
-
-ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
-	CFLAGS += -O0
-else
-	CFLAGS += -O2
-endif
-ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
-	INSTALL_PROGRAM += -s
-endif
-
 configure: configure-stamp
 configure-stamp:
 	dh_testdir
@@ -55,7 +44,7 @@ clean:
 install: build
 	dh_testdir
 	dh_testroot
-	dh_clean -k
+	dh_prep
 	dh_installdirs
 
 	# Add here commands to install the package into debian/unicode.
@@ -92,7 +81,7 @@ binary-indep: build install
 	dh_installdeb
 #	dh_perl
 #	dh_shlibdeps
-	dh_python2
+	dh_python3
 	dh_gencontrol
 	dh_md5sums
 	dh_builddeb
