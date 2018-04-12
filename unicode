@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 from __future__ import unicode_literals
 
@@ -66,7 +66,7 @@ else: # python2
 
 from optparse import OptionParser
 
-VERSION='2.5'
+VERSION='2.6'
 
 
 # list of terminals that support bidi
@@ -363,7 +363,7 @@ def error(txt):
     sys.exit(1)
 
 def get_gzip_filename(fname):
-    "return fname, if it does not exist, return fname+.gz, if neither that, fname+bz2, if neither that, return None"
+    "return fname, if it does not exist, return fname+.gz, if neither that, fname+.bz2, if neither that, fname+.xz, if neither that, return None"
     if os.path.exists(fname):
         return fname
     if os.path.exists(fname+'.gz'):
@@ -492,7 +492,7 @@ def guesstype(arg):
             if val>sys.maxunicode:
                 return 'regexp', arg
             else:
-                return 'hexadecimal', arg
+                return 'hexadecimal', arg[1:]
         except ValueError:
             return 'regexp', arg
     elif len(arg)>=4:
@@ -611,7 +611,7 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
         if maxcount:
             counter += 1
         if counter > options.maxcount:
-            out("\nToo many characters to display, more than %s, use --max option to change it\n" % options.maxcount)
+            out("\nToo many characters to display, more than %s, use --max 0 (or other value) option to change it\n" % options.maxcount)
             return
         for colour_key in colours.keys():
             locals()[colour_key] = maybe_colours(colour_key)

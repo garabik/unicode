@@ -2,12 +2,12 @@ Source: unicode
 Section: utils
 Priority: optional
 Maintainer: Radovan Garabík <garabik@kassiopeia.juls.savba.sk>
-Build-Depends: debhelper (>= 4), python (>= 2.6)
-Standards-Version: 3.9.4
+Build-Depends: debhelper (>= 4), dh-python
+Standards-Version: 3.9.6
 
 Package: unicode
 Architecture: all
-Depends: ${misc:Depends}, ${python:Depends}
+Depends: ${misc:Depends}, ${python3:Depends}
 Recommends: unicode-data
 Description: display unicode character properties
  unicode is a simple command line utility that displays

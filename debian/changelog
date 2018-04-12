@@ -1,3 +1,12 @@
+unicode (2.6) unstable; urgency=low
+
+  * fix crash when using Uxxxx (as opposed to U+xxxx) (closes: #836594)
+  * improve message when there are too many characters
+    to display (closes: #868490)
+  * python3 by default (closes: #874672)
+
+ -- Radovan Garabík <garabik@kassiopeia.juls.savba.sk>  Mon, 09 Apr 2018 16:41:29 +0200
+
 unicode (2.5) unstable; urgency=low
 
   * do not display control characters in tabular output
