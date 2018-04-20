@@ -623,8 +623,11 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
             name = properties['name']
         else:
             name = " - No such unicode character name in database"
-        utf8 = ' '.join([("%02x" % ord23(x)) for x in c.encode('utf-8')])
-        utf16be = ''.join([("%02x" % ord23(x)) for x in c.encode('utf-16be')])
+        if 0xd800 <= ordc <= 0xdfff: # surrogate
+            utf8 = utf16be = 'N/A'
+        else:
+            utf8 = ' '.join([("%02x" % ord23(x)) for x in c.encode('utf-8')])
+            utf16be = ''.join([("%02x" % ord23(x)) for x in c.encode('utf-16be')])
         decimal = "&#%s;" % ordc
         octal = "\\0%o" % ordc
 
