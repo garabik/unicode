@@ -597,6 +597,10 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
             1 - spawn browser
     """
     counter = 0
+
+    for colour_key in colours.keys():
+        locals()[colour_key] = maybe_colours(colour_key)
+
     for c in clist:
 
         if query_wikipedia or query_wiktionary:
@@ -613,8 +617,6 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
         if counter > options.maxcount:
             out("\nToo many characters to display, more than %s, use --max 0 (or other value) option to change it\n" % options.maxcount)
             return
-        for colour_key in colours.keys():
-            locals()[colour_key] = maybe_colours(colour_key)
         properties = get_unicode_properties(c)
         ordc = ord(c)
         if properties['name']:
