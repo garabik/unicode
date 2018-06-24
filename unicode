@@ -35,7 +35,7 @@ if PY3:
     def out(*args):
         "pring args, converting them to output charset"
         for i in args:
-            sys.stdout.flush()
+            #sys.stdout.flush()
             sys.stdout.buffer.write(i.encode(options.iocharset, 'replace'))
 
     # ord23 is used to convert elements of byte array in python3, which are already integers
@@ -66,7 +66,7 @@ else: # python2
 
 from optparse import OptionParser
 
-VERSION='2.6'
+VERSION='2.7'
 
 
 # list of terminals that support bidi
