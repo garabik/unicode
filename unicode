@@ -273,6 +273,7 @@ def get_unicode_properties(ch):
         properties['uppercase'] = ch.upper() # this is not correct
         properties['lowercase'] = ch.lower()
         properties['titlecase'] = ''
+    properties['east_asian_width'] = get_east_asian_width(ch)
     return properties
 
 
@@ -678,7 +679,7 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
         bidi_desc = bidi_category.get(bidi, bidi)
         if bidi:
             opt_bidi = 'Bidi: '
-            bidi_desc = ' ({0})'.format(bidi_desc)
+            bidi_desc = ' ({0})\n'.format(bidi_desc)
         mirrored_desc = ''
         mirrored = properties['mirrored']
         if mirrored:
@@ -696,6 +697,9 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
         if decomp:
             opt_decomp = 'Decomposition: '
             decomp_desc = decomp+'\n'
+        if properties['east_asian_width']:
+            opt_eaw = 'East asian width: '
+            eaw_desc = properties['east_asian_width']
 
         opt_unicode_block = ''
         opt_unicode_block_desc = ''
@@ -722,6 +726,9 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
             for key in uhp:
                 printkv(key, uhp[key])
 
+def get_east_asian_width(c):
+    eaw = 'east_asian_width' in unicodedata.__dict__ and unicodedata.east_asian_width(c)
+    return eaw
 
 def print_block(block):
     #header
@@ -747,7 +754,7 @@ def print_block(block):
             if unicodedata.combining(c):
                 c_out = " "+c
             # fallback for python without east_asian_width (probably unnecessary, since this script does not work with <2.6 anyway)
-            fullwidth = 'east_asian_width' in unicodedata.__dict__ and unicodedata.east_asian_width(c)[0] in 'FW'
+            fullwidth = get_east_asian_width(c)[0] in 'FW'
             if not fullwidth:
                 c_out = ' '+c_out
             out(c_out)
@@ -786,7 +793,7 @@ format_string_default = '''{yellow}{bold}U+{ordc:04X} {name}{default}
 {green}UTF-8:{default} {utf8} {green}UTF-16BE:{default} {utf16be} {green}Decimal:{default} {decimal} {green}Octal:{default} {octal}{opt_additional}
 {pchar}{opt_flipcase}{opt_uppercase}{opt_lowercase}
 {green}Category:{default} {category} ({category_desc})
-{green}{opt_unicode_block}{default}{opt_unicode_block_desc}{green}{opt_numeric}{default}{numeric_desc}{green}{opt_digit}{default}{digit_desc}{green}{opt_bidi}{default}{bidi}{bidi_desc}
+{green}{opt_unicode_block}{default}{opt_unicode_block_desc}{green}{opt_numeric}{default}{numeric_desc}{green}{opt_digit}{default}{digit_desc}{green}{opt_bidi}{default}{bidi}{bidi_desc}{green}{opt_eaw}{default}{eaw_desc}
 {mirrored_desc}{green}{opt_combining}{default}{combining_desc}{green}{opt_decomp}{default}{decomp_desc}
 '''
 
