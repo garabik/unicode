@@ -208,6 +208,15 @@ comb_classes = {
       240: 'Below (iota subscript)',
 }
 
+eaw_description = {
+    'F': 'fullwidth',
+    'H': 'halfwidth',
+    'W': 'wide',
+    'Na':'narrow',
+    'A': 'ambiguous',
+    'N': 'neutral'
+}
+
 def get_unicode_blocks_descriptions():
     "parses Blocks.txt"
     unicodeblocks = {} # (low, high): 'desc'
@@ -698,8 +707,9 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
             opt_decomp = 'Decomposition: '
             decomp_desc = decomp+'\n'
         if properties['east_asian_width']:
-            opt_eaw = 'East asian width: '
-            eaw_desc = properties['east_asian_width']
+            opt_eaw = 'East Asian width: '
+            eaw = properties['east_asian_width']
+            eaw_desc = '{eaw} ({desc})'.format(eaw=eaw, desc=eaw_description.get(eaw, eaw))
 
         opt_unicode_block = ''
         opt_unicode_block_desc = ''
