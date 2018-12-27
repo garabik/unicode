@@ -21,7 +21,7 @@ Enter regular expression, hexadecimal number or some characters as an
 argument. unicode will try to guess what you want to look up, see the
 manpage if you want to force other behaviour (the manpage is also the
 best documentation). In particular, -r forces searching for regular
-expression in the names of character, -s forces unicode to display
+expression in the names of characters, -s forces unicode to display
 information about the characters given.
 
 Here are just some examples:

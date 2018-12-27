@@ -1,3 +1,9 @@
+unicode (2.7) unstable; urgency=low
+
+  * add East Asian width
+
+ -- Radovan Garabík <garabik@kassiopeia.juls.savba.sk>  Thu, 27 Dec 2018 18:17:29 +0100
+
 unicode (2.6) unstable; urgency=low
 
   * fix crash when using Uxxxx (as opposed to U+xxxx) (closes: #836594)
