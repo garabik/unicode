@@ -1,6 +1,8 @@
 unicode (2.7-1) unstable; urgency=low
 
   * add East Asian width
+  * hack to consider regular expressions ending with '$' (closes: #830996)
+  * do not flush stdout (closes: #902018)
   * convert to quilt
 
  -- Radovan Garabík <garabik@kassiopeia.juls.savba.sk>  Thu, 27 Dec 2018 18:17:29 +0100
