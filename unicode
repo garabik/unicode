@@ -407,12 +407,16 @@ def OpenGzip(fname):
         return fo
 
 def GrepInNames(pattern, prefill_cache=False):
-    pat = re.compile(pattern, re.I)
     f = None
     for name in UnicodeDataFileNames:
         f = OpenGzip(name)
         if f != None:
             break
+    if f:
+        if pattern.endswith('$'):
+            pattern = pattern[:-1]+';'
+    pat = re.compile(pattern, re.I)
+
     if not f:
         out( """
 Cannot find UnicodeData.txt, please place it into
