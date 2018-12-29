@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 import os, glob, sys, unicodedata, locale, gzip, re, traceback, encodings, io, codecs
 import webbrowser, textwrap, struct
-from pprint import pprint
+#from pprint import pprint
 
 # bz2 was introduced in 2.3, but we want this to work even if for some
 # reason it is not available
@@ -35,7 +35,7 @@ if PY3:
     def out(*args):
         "pring args, converting them to output charset"
         for i in args:
-            sys.stdout.flush()
+            #sys.stdout.flush()
             sys.stdout.buffer.write(i.encode(options.iocharset, 'replace'))
 
     # ord23 is used to convert elements of byte array in python3, which are already integers
@@ -66,7 +66,7 @@ else: # python2
 
 from optparse import OptionParser
 
-VERSION='2.6'
+VERSION='2.7'
 
 
 # list of terminals that support bidi
@@ -208,6 +208,15 @@ comb_classes = {
       240: 'Below (iota subscript)',
 }
 
+eaw_description = {
+    'F': 'fullwidth',
+    'H': 'halfwidth',
+    'W': 'wide',
+    'Na':'narrow',
+    'A': 'ambiguous',
+    'N': 'neutral'
+}
+
 def get_unicode_blocks_descriptions():
     "parses Blocks.txt"
     unicodeblocks = {} # (low, high): 'desc'
@@ -248,7 +257,6 @@ def get_unicode_properties(ch):
         for i, prop in enumerate(proplist):
             if prop!='dummy':
                 properties[prop] = fields[i]
-
         if properties['lowercase']:
             properties['lowercase'] = chr(int(properties['lowercase'], 16))
         if properties['uppercase']:
@@ -270,9 +278,17 @@ def get_unicode_properties(ch):
         properties['mirrored'] = unicodedata.mirrored(ch)
         properties['unicode1name'] = ''
         properties['iso_comment'] = ''
-        properties['uppercase'] = ch.upper() # this is not correct
-        properties['lowercase'] = ch.lower()
-        properties['titlecase'] = ''
+        properties['lowercase'] = properties['uppercase'] = properties['titlecase'] = ''
+        ch_up = ch.upper()
+        ch_lo = ch.lower()
+        ch_title = ch.title()
+        if ch_up != ch:
+            properties['uppercase'] = ch_up
+        if ch_lo != ch:
+            properties['lowercase'] = ch_lo
+        if ch_title != ch_up:
+            properties['titlecase'] = ch_title
+    properties['east_asian_width'] = get_east_asian_width(ch)
     return properties
 
 
@@ -397,12 +413,16 @@ def OpenGzip(fname):
         return fo
 
 def GrepInNames(pattern, prefill_cache=False):
-    pat = re.compile(pattern, re.I)
     f = None
     for name in UnicodeDataFileNames:
         f = OpenGzip(name)
         if f != None:
             break
+    if f:
+        if pattern.endswith('$'):
+            pattern = pattern[:-1]+';'
+    pat = re.compile(pattern, re.I)
+
     if not f:
         out( """
 Cannot find UnicodeData.txt, please place it into
@@ -597,6 +617,10 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
             1 - spawn browser
     """
     counter = 0
+
+    for colour_key in colours.keys():
+        locals()[colour_key] = maybe_colours(colour_key)
+
     for c in clist:
 
         if query_wikipedia or query_wiktionary:
@@ -613,16 +637,17 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
         if counter > options.maxcount:
             out("\nToo many characters to display, more than %s, use --max 0 (or other value) option to change it\n" % options.maxcount)
             return
-        for colour_key in colours.keys():
-            locals()[colour_key] = maybe_colours(colour_key)
         properties = get_unicode_properties(c)
         ordc = ord(c)
         if properties['name']:
             name = properties['name']
         else:
             name = " - No such unicode character name in database"
-        utf8 = ' '.join([("%02x" % ord23(x)) for x in c.encode('utf-8')])
-        utf16be = ''.join([("%02x" % ord23(x)) for x in c.encode('utf-16be')])
+        if 0xd800 <= ordc <= 0xdfff: # surrogate
+            utf8 = utf16be = 'N/A'
+        else:
+            utf8 = ' '.join([("%02x" % ord23(x)) for x in c.encode('utf-8')])
+            utf16be = ''.join([("%02x" % ord23(x)) for x in c.encode('utf-16be')])
         decimal = "&#%s;" % ordc
         octal = "\\0%o" % ordc
 
@@ -673,7 +698,7 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
         bidi_desc = bidi_category.get(bidi, bidi)
         if bidi:
             opt_bidi = 'Bidi: '
-            bidi_desc = ' ({0})'.format(bidi_desc)
+            bidi_desc = ' ({0})\n'.format(bidi_desc)
         mirrored_desc = ''
         mirrored = properties['mirrored']
         if mirrored:
@@ -691,6 +716,10 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
         if decomp:
             opt_decomp = 'Decomposition: '
             decomp_desc = decomp+'\n'
+        if properties['east_asian_width']:
+            opt_eaw = 'East Asian width: '
+            eaw = properties['east_asian_width']
+            eaw_desc = '{eaw} ({desc})'.format(eaw=eaw, desc=eaw_description.get(eaw, eaw))
 
         opt_unicode_block = ''
         opt_unicode_block_desc = ''
@@ -717,6 +746,9 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
             for key in uhp:
                 printkv(key, uhp[key])
 
+def get_east_asian_width(c):
+    eaw = 'east_asian_width' in unicodedata.__dict__ and unicodedata.east_asian_width(c)
+    return eaw
 
 def print_block(block):
     #header
@@ -742,7 +774,7 @@ def print_block(block):
             if unicodedata.combining(c):
                 c_out = " "+c
             # fallback for python without east_asian_width (probably unnecessary, since this script does not work with <2.6 anyway)
-            fullwidth = 'east_asian_width' in unicodedata.__dict__ and unicodedata.east_asian_width(c)[0] in 'FW'
+            fullwidth = get_east_asian_width(c)[0] in 'FW'
             if not fullwidth:
                 c_out = ' '+c_out
             out(c_out)
@@ -780,8 +812,8 @@ def unescape(s):
 format_string_default = '''{yellow}{bold}U+{ordc:04X} {name}{default}
 {green}UTF-8:{default} {utf8} {green}UTF-16BE:{default} {utf16be} {green}Decimal:{default} {decimal} {green}Octal:{default} {octal}{opt_additional}
 {pchar}{opt_flipcase}{opt_uppercase}{opt_lowercase}
-{green}Category:{default} {category} ({category_desc})
-{green}{opt_unicode_block}{default}{opt_unicode_block_desc}{opt_numeric}{default}{numeric_desc}{green}{opt_digit}{default}{digit_desc}{green}{opt_bidi}{default}{bidi}{bidi_desc}
+{green}Category:{default} {category} ({category_desc}); {green}{opt_eaw}{default}{eaw_desc}
+{green}{opt_unicode_block}{default}{opt_unicode_block_desc}{green}{opt_numeric}{default}{numeric_desc}{green}{opt_digit}{default}{digit_desc}{green}{opt_bidi}{default}{bidi}{bidi_desc}
 {mirrored_desc}{green}{opt_combining}{default}{combining_desc}{green}{opt_decomp}{default}{decomp_desc}
 '''
 

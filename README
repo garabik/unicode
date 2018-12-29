@@ -21,7 +21,7 @@ Enter regular expression, hexadecimal number or some characters as an
 argument. unicode will try to guess what you want to look up, see the
 manpage if you want to force other behaviour (the manpage is also the
 best documentation). In particular, -r forces searching for regular
-expression in the names of character, -s forces unicode to display
+expression in the names of characters, -s forces unicode to display
 information about the characters given.
 
 Here are just some examples:
@@ -130,5 +130,10 @@ recognized:
 {opt_decomp}{decomp_desc} -- the string `Decomposition: ' and a hexadecimal sequence
                              of decomposition characters; empty if the character
                              has no decomposition
-{opt_unicode_block}{opt_unicode_block_desc} -- the string `Unicode block:', range of the unicode block and description of said unicode block for the given character
+{opt_unicode_block}{opt_unicode_block_desc} -- the string `Unicode block:',
+                                               range of the unicode block
+                                               and description of said unicode
+                                               block for the given character
+{opt_eaw}{eaw_desc} -- the string `East Asian width:' and the human readable
+                       value of East Asian width
 

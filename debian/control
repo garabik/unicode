@@ -3,7 +3,7 @@ Section: utils
 Priority: optional
 Maintainer: Radovan Garabík <garabik@kassiopeia.juls.savba.sk>
 Build-Depends: debhelper (>= 4), dh-python
-Standards-Version: 3.9.6
+Standards-Version: 4.3.0
 
 Package: unicode
 Architecture: all
