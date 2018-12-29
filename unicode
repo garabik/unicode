@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 import os, glob, sys, unicodedata, locale, gzip, re, traceback, encodings, io, codecs
 import webbrowser, textwrap, struct
-from pprint import pprint
+#from pprint import pprint
 
 # bz2 was introduced in 2.3, but we want this to work even if for some
 # reason it is not available
@@ -257,7 +257,6 @@ def get_unicode_properties(ch):
         for i, prop in enumerate(proplist):
             if prop!='dummy':
                 properties[prop] = fields[i]
-
         if properties['lowercase']:
             properties['lowercase'] = chr(int(properties['lowercase'], 16))
         if properties['uppercase']:
@@ -279,9 +278,16 @@ def get_unicode_properties(ch):
         properties['mirrored'] = unicodedata.mirrored(ch)
         properties['unicode1name'] = ''
         properties['iso_comment'] = ''
-        properties['uppercase'] = ch.upper() # this is not correct
-        properties['lowercase'] = ch.lower()
-        properties['titlecase'] = ''
+        properties['lowercase'] = properties['uppercase'] = properties['titlecase'] = ''
+        ch_up = ch.upper()
+        ch_lo = ch.lower()
+        ch_title = ch.title()
+        if ch_up != ch:
+            properties['uppercase'] = ch_up
+        if ch_lo != ch:
+            properties['lowercase'] = ch_lo
+        if ch_title != ch_up:
+            properties['titlecase'] = ch_title
     properties['east_asian_width'] = get_east_asian_width(ch)
     return properties
 
