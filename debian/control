@@ -8,6 +8,7 @@ Standards-Version: 4.3.0
 Package: unicode
 Architecture: all
 Depends: ${misc:Depends}, ${python3:Depends}
+Suggests: bzip2
 Recommends: unicode-data
 Description: display unicode character properties
  unicode is a simple command line utility that displays
