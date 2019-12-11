@@ -635,7 +635,7 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
         if maxcount:
             counter += 1
         if counter > options.maxcount:
-            out("\nToo many characters to display, more than %s, use --max 0 (or other value) option to change it\n" % options.maxcount)
+            sys.stderr.write("\nToo many characters to display, more than %s, use --max 0 (or other value) option to change it\n" % options.maxcount)
             return
         properties = get_unicode_properties(c)
         ordc = ord(c)
