@@ -4,7 +4,7 @@
 unicode \- command line unicode database query tool
 .SH SYNOPSIS
 .B unicode
-.RI [ options ] 
+.RI [ options ]
 string
 .SH DESCRIPTION
 This manual page documents the
@@ -15,76 +15,76 @@ command.
 
 .SH OPTIONS
 .TP
-.BI \-h 
-.BI \-\-help 
+.B \-h
+.B \-\-help
 
 Show help and exit.
 
 .TP
-.BI \-x
-.BI \-\-hexadecimal
+.B \-x
+.B \-\-hexadecimal
 
-Assume 
+Assume
 .I string
-to be a hexadecimal number 
+to be a hexadecimal number
 
 .TP
-.BI \-d
-.BI \-\-decimal
+.B \-d
+.B \-\-decimal
 
-Assume 
+Assume
 .I string
-to be a decimal number 
+to be a decimal number
 
 .TP
-.BI \-o
-.BI \-\-octal
+.B \-o
+.B \-\-octal
 
-Assume 
+Assume
 .I string
-to be an octal number 
+to be an octal number
 
 .TP
-.BI \-b
-.BI \-\-binary
+.B \-b
+.B \-\-binary
 
-Assume 
+Assume
 .I string
-to be a binary number 
+to be a binary number
 
 .TP
-.BI \-r
-.BI \-\-regexp
+.B \-r
+.B \-\-regexp
 
-Assume 
+Assume
 .I string
 to be a regular expression
 
 .TP
-.BI \-s
-.BI \-\-string
+.B \-s
+.B \-\-string
 
-Assume 
+Assume
 .I string
 to be a sequence of characters
 
 .TP
-.BI \-a
-.BI \-\-auto
+.B \-a
+.B \-\-auto
 
 Try to guess type of
 .I string
 from one of the above (default)
 
 .TP
-.BI \-mMAXCOUNT
-.BI \-\-max=MAXCOUNT
+.BI \-m MAXCOUNT
+.BI \-\-max= MAXCOUNT
 
 Maximal number of codepoints to display, default: 20; use 0 for unlimited
 
 .TP
-.BI \-iCHARSET
-.BI \-\-io=IOCHARSET
+.BI \-i CHARSET
+.BI \-\-io= IOCHARSET
 
 I/O character set. For maximal pleasure, run \fBunicode\fP on UTF-8
 capable terminal and specify IOCHARSET to be UTF-8. \fBunicode\fP
@@ -92,8 +92,8 @@ tries to guess this value from your locale, so with properly set up
 locale, you should not need to specify it.
 
 .TP
-.BI \-\-fcp=CHARSET
-.BI \-\-fromcp=CHARSET
+.BI \-\-fcp= CHARSET
+.BI \-\-fromcp= CHARSET
 
 Convert numerical arguments from this encoding, default: no conversion.
 Multibyte encodings are supported. This is ignored for non-numerical
@@ -101,19 +101,19 @@ arguments.
 
 
 .TP
-.BI \-cADDCHARSET
-.BI \-\-charset\-add=ADDCHARSET
+.BI \-c ADDCHARSET
+.BI \-\-charset\-add= ADDCHARSET
 
 Show hexadecimal reprezentation of displayed characters in this additional charset.
 
 .TP
-.BI \-CUSE_COLOUR
-.BI \-\-colour=USE_COLOUR
+.BI \-C USE_COLOUR
+.BI \-\-colour= USE_COLOUR
 
 USE_COLOUR is one of
-.I on
-.I off
-.I auto
+.B on
+.B off
+.B auto
 
 .B \-\-colour=on
 will use ANSI colour codes to colourise the output
@@ -121,62 +121,62 @@ will use ANSI colour codes to colourise the output
 .B \-\-colour=off
 won't use colours.
 
-.B \-\-colour=auto 
+.B \-\-colour=auto
 will test if standard output is a tty, and use colours only when it is.
 
-.BI \-\-color
+.B \-\-color
 is a synonym of
-.BI \-\-colour
+.B \-\-colour
 
 .TP
-.BI \-v
-.BI \-\-verbose
+.B \-v
+.B \-\-verbose
 
 Be more verbose about displayed characters, e.g. display Unihan information, if available.
 
 .TP
-.BI \-w
-.BI \-\-wikipedia
+.B \-w
+.B \-\-wikipedia
 
 Spawn browser pointing to English Wikipedia entry about the character.
 
 .TP
-.BI \-\-wt
-.BI \-\-wiktionary
+.B \-\-wt
+.B \-\-wiktionary
 
 Spawn browser pointing to English Wiktionary entry about the character.
 
 .TP
-.BI \-\-brief
+.B \-\-brief
 
 Display character information in brief format
 
 .TP
-.BI \-\-format=fmt
+.BI \-\-format= fmt
 
 Use your own format for character information display. See the README for details.
 
 
 .TP
-.BI \-\-list
+.B \-\-list
 
 List (approximately) all known encodings.
 
 .TP
-.BI \-\-ascii
+.B \-\-ascii
 
 Display ASCII table
 
 .TP
-.BI \-\-brexit\-ascii
-.BI \-\-brexit
+.B \-\-brexit\-ascii
+.B \-\-brexit
 
 Display ASCII table (EU–UK Trade and Cooperation Agreement 2020 version)
 
 
 .SH USAGE
 
-\fBunicode\fP tries to guess the type of an argument. In particular, 
+\fBunicode\fP tries to guess the type of an argument. In particular,
 if the arguments looks like a valid hexadecimal representation of a
 Unicode codepoint, it will be considered to be such. Using
 
@@ -186,7 +186,7 @@ will display information about U+FACE CJK COMPATIBILITY IDEOGRAPH-FACE,
 and it will not search for 'face' in character descriptions \- for the latter,
 use:
 
-\fBunicode\fP -r face
+\fBunicode\fP \-r face
 
 
 For example, you can use any of the following to display information
@@ -203,26 +203,26 @@ about  U+00E1 LATIN SMALL LETTER A WITH ACUTE (\('a):
 
 You can specify a range of characters as argumets, \fBunicode\fP will
 show these characters in nice tabular format, aligned to 256-byte boundaries.
-Use two dots ".." to indicate the range, e.g. 
+Use two dots ".." to indicate the range, e.g.
 
 \fBunicode\fP 0450..0520
 
 will display the whole cyrillic and hebrew blocks (characters from U+0400 to U+05FF)
 
-\fBunicode\fP 0400.. 
+\fBunicode\fP 0400..
 
 will display just characters from U+0400 up to U+04FF
 
-Use --fromcp to query codepoints from other encodings:
+Use \-\-fromcp to query codepoints from other encodings:
 
-\fBunicode\fP --fromcp cp1250 -d 200
+\fBunicode\fP \-\-fromcp cp1250 \-d 200
 
 Multibyte encodings are supported:
-\fBunicode\fP --fromcp big5 -x aff3
+\fBunicode\fP \-\-fromcp big5 \-x aff3
 
 and multi-char strings are supported, too:
 
-\fBunicode\fP --fromcp utf-8 -x c599c3adc5a5
+\fBunicode\fP \-\-fromcp utf-8 \-x c599c3adc5a5
 
 .SH BUGS
 Tabular format does not deal well with full-width, combining, control
