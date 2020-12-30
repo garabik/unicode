@@ -201,7 +201,7 @@ def main():
     (options, args) = parser.parse_args()
 
     if args:
-        to_convert = ' '.join(args).decode('utf-8')
+        to_convert = decode(' '.join(args), 'utf-8')
     else:
         to_convert = None
 
