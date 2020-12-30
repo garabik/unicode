@@ -2,7 +2,7 @@ Source: unicode
 Section: utils
 Priority: optional
 Maintainer: Radovan Garabík <garabik@kassiopeia.juls.savba.sk>
-Build-Depends: debhelper (>= 4), dh_python3
+Build-Depends: debhelper (>= 4), dh-python, python3
 Standards-Version: 4.3.0
 
 Package: unicode
