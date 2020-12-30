@@ -4,34 +4,35 @@
 paracode \- command line Unicode conversion tool
 .SH SYNOPSIS
 .B paracode
-.RI [ -t tables ] 
+.RB [ \-t
+.IR tables ]
 string
 .SH DESCRIPTION
 This manual page documents the
 .B paracode
 command.
 .PP
-\fBparacode\fP exploits the full power of the Unicode standard to convert the text
-into visually similar stream of glyphs, while using completely different codepoints.
-It is an excellent didactic tool demonstrating the principles and advanced use of
-the Unicode standard.
+\fBparacode\fP exploits the full power of the Unicode standard to convert
+the text into visually similar stream of glyphs, while using completely
+different codepoints.
+It is an excellent didactic tool demonstrating the principles and advanced
+use of the Unicode standard.
 .PP
 \fBparacode\fP is a command line tool working as
 a filter, reading standard input in UTF-8 encoding and writing to
 standard output.
-
+.
 .SH OPTIONS
 .TP
 .BI \-t tables
-.BI \-\-tables
+.BI \-\-tables tables
 
 Use given list of conversion tables, separated by a plus sign.
 
 Special name 'all' selects all the tables.
 
-Note that selecting 'other', 'cyrillic_plus' and 'cherokee' tables (and 'all') 
+Note that selecting 'other', 'cyrillic_plus' and 'cherokee' tables (and 'all')
 makes use of rather esoteric characters, and not all fonts contain them.
-
 
 Special table 'mirror' uses quite different character substitution,
 is not selected automatically with 'all' and does not work well
@@ -39,11 +40,11 @@ with anything except plain ascii alphabetical characters.
 
 Example:
 
-paracode -t cyrillic+greek+cherokee
+paracode \-t cyrillic+greek+cherokee
 
-paracode -t cherokee  <input >output
+paracode \-t cherokee  <input >output
 
-paracode -r -t mirror  <input >output
+paracode \-r \-t mirror  <input >output
 
 
 
@@ -60,16 +61,16 @@ other
 cherokee
 
 all
-
+.
 .TP
-.BI \-r
+.B \-r
 
-Display text in reverse order after conversion, best used together with -t mirror.
-
+Display text in reverse order after conversion,
+best used together with \-t mirror.
+.
 .SH SEE ALSO
-iconv(1)
-
-
+.BR iconv (1)
+.
 .SH AUTHOR
 Radovan Garab\('ik <garabik @ kassiopeia.juls.savba.sk>
 
