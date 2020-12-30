@@ -2,7 +2,7 @@ unicode (2.8-1) unstable; urgency=low
 
   * display ASCII table (either traditional or the EU–UK Trade and Cooperation
     Agreement version)
-  * tidy up manpage (closes: #972047)
+  * tidy up manpage (closes: #972047) (closes:#972063)
   * fix decoding paracode arguments (closes: #939196)
 
  -- Radovan Garabik <garabik@eniac.juls.savba.sk>  Wed, 30 Dec 2020 16:18:32 +0100
