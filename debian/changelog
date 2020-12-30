@@ -5,7 +5,7 @@ unicode (2.8-1) unstable; urgency=low
   * tidy up manpage (closes: #972047) (closes:#972063)
   * fix decoding paracode arguments (closes: #939196)
 
- -- Radovan Garabik <garabik@eniac.juls.savba.sk>  Wed, 30 Dec 2020 16:18:32 +0100
+ -- Radovan Garabík <garabik@kassiopeia.juls.savba.sk>  Wed, 30 Dec 2020 17:13:32 +0100
 
 unicode (2.7-1) unstable; urgency=low
 
