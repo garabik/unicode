@@ -66,7 +66,7 @@ else: # python2
 
 from optparse import OptionParser
 
-VERSION='2.7'
+VERSION='2.8'
 
 
 # list of terminals that support bidi
@@ -635,7 +635,8 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
         if maxcount:
             counter += 1
         if counter > options.maxcount:
-            out("\nToo many characters to display, more than %s, use --max 0 (or other value) option to change it\n" % options.maxcount)
+            sys.stdout.flush()
+            sys.stderr.write("\nToo many characters to display, more than %s, use --max 0 (or other value) option to change it\n" % options.maxcount)
             return
         properties = get_unicode_properties(c)
         ordc = ord(c)
@@ -809,6 +810,49 @@ def is_range(s, typ):
 def unescape(s):
     return s.replace(r'\n', '\n')
 
+ascii_cc_names = ('NUL', 'SOH', 'STX', 'ETX', 'EOT', 'ENQ', 'ACK', 'BEL', 'BS', 'HT', 'LF', 'VT', 'FF', 'CR', 'SO', 'SI', 'DLE', 'DC1', 'DC2', 'DC3', 'DC4', 'NAK', 'SYN', 'ETB', 'CAN', 'EM', 'SUB', 'ESC', 'FS', 'GS', 'RS', 'US')
+
+def display_ascii_table():
+    print('Dec Hex    Dec Hex    Dec Hex  Dec Hex  Dec Hex  Dec Hex   Dec Hex   Dec Hex')
+    for row in range(0, 16):
+        for col in range(0, 8):
+            cp = 16*col+row
+            ch = chr(cp) if 32<=cp else ascii_cc_names[cp]
+            ch = 'DEL' if cp==127 else ch
+            frm = '{:3d} {:02X} {:2s}'
+            if cp < 32:
+                frm = '{:3d} {:02X} {:4s}'
+            elif cp >= 96:
+                frm = '{:4d} {:02X} {:2s}'
+            cell = frm.format(cp, cp, ch)
+            print(cell, end='')
+        print()
+
+brexit_ascii_diffs = {
+ 30: ' ',
+ 31: ' ',
+ 34: "'",
+123: '{}{',
+125: '}}',
+127: ' ',
+128: ' ',
+129: ' ',
+        }
+
+def display_brexit_ascii_table():
+    print(' + | 0    1    2    3    4    5    6    7    8    9')
+    print('---+-----------------------------------------------')
+    for row in range(30, 130, 10):
+        print('{:3d}'.format(row), end='|')
+        for col in range(0, 10):
+            cp = col+row
+            ch = brexit_ascii_diffs.get(cp, chr(cp))
+            cell = ' {:3s} '.format(ch)
+            print(cell, end='')
+        print()
+
+
+
 format_string_default = '''{yellow}{bold}U+{ordc:04X} {name}{default}
 {green}UTF-8:{default} {utf8} {green}UTF-16BE:{default} {utf16be} {green}Decimal:{default} {decimal} {green}Octal:{default} {octal}{opt_additional}
 {pchar}{opt_flipcase}{opt_uppercase}{opt_lowercase}
@@ -884,6 +928,14 @@ def main():
           action="store_const", dest="format_string",
           const='{pchar} U+{ordc:04X} {name}\n',
           help="Brief format")
+    parser.add_option("--ascii",
+          action="store_const", dest="ascii_table",
+          const=True,
+          help="Display ASCII table")
+    parser.add_option("--brexit-ascii", "--brexit",
+          action="store_const", dest="brexit_ascii_table",
+          const=True,
+          help="Display ASCII table (EU–UK Trade and Cooperation Agreement version)")
 
     global options
     (options, arguments) = parser.parse_args()
@@ -898,6 +950,15 @@ def main():
         all_encodings.sort()
         print (textwrap.fill(' '.join(all_encodings)))
         sys.exit()
+
+    if options.ascii_table:
+        display_ascii_table()
+        sys.exit()
+
+    if options.brexit_ascii_table:
+        display_brexit_ascii_table()
+        sys.exit()
+
 
     if len(arguments)==0:
         parser.print_help()
