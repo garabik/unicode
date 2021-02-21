@@ -332,7 +332,7 @@ def get_unihan_properties_internal(ch):
                 continue
             char, key, value = line.strip().split('\t')
             if int(char[2:], 16) == ch:
-                properties[key] = value.decode('utf-8')
+                properties[key] = value
             elif int(char[2:], 16)>ch:
                 break
     return properties
