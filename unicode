@@ -924,7 +924,7 @@ def main():
           action="store", dest="format_string", type="string",
           default=format_string_default,
           help="formatting string")
-    parser.add_option("--brief", "--terse",
+    parser.add_option("--brief", "--terse", "--br",
           action="store_const", dest="format_string",
           const='{pchar} U+{ordc:04X} {name}\n',
           help="Brief format")
