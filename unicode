@@ -428,8 +428,10 @@ def GrepInNames(pattern, prefill_cache=False):
 Cannot find UnicodeData.txt, please place it into
 /usr/share/unidata/UnicodeData.txt,
 /usr/share/unicode/UnicodeData.txt, ~/.unicode/ or current
-working directory (optionally you can gzip it).
+working directory (optionally you can gzip, bzip2 or xz it).
 Without the file, searching will be much slower.
+
+You can donwload the file from http://www.unicode.org/Public/13.0.0/ucd/UnicodeData.txt (or replace 13.0.0 with current Unicode version).
 
 """ )
 
