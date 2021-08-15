@@ -1,9 +1,11 @@
 #!/usr/bin/python3
 
-from __future__ import unicode_literals
+from __future__ import unicode_literals, print_function
 
 import os, glob, sys, unicodedata, locale, gzip, re, traceback, encodings, io, codecs
 import webbrowser, textwrap, struct
+
+
 #from pprint import pprint
 
 # bz2 was introduced in 2.3, but we want this to work even if for some
@@ -946,7 +948,7 @@ def main():
     parser.add_option("--brexit-ascii", "--brexit",
           action="store_const", dest="brexit_ascii_table",
           const=True,
-          help="Display ASCII table (EU–UK Trade and Cooperation Agreement version)")
+          help="Display ASCII table (EU-UK Trade and Cooperation Agreement version)")
 
     global options
     (options, arguments) = parser.parse_args()
