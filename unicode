@@ -66,7 +66,7 @@ else: # python2
 
 from optparse import OptionParser
 
-VERSION='2.8'
+VERSION='2.9'
 
 
 # list of terminals that support bidi
@@ -412,6 +412,15 @@ def OpenGzip(fname):
         fo = codecs.getreader('utf-8')(fo)
         return fo
 
+def get_unicode_cur_version():
+    # return current version of the Unicode standard, hardwired for now
+    return '13.0.0'
+
+def get_unicodedata_url():
+    unicode_version = get_unicode_cur_version()
+    url = 'http://www.unicode.org/Public/{}/ucd/UnicodeData.txt'.format(unicode_version)
+    return url
+
 def GrepInNames(pattern, prefill_cache=False):
     f = None
     for name in UnicodeDataFileNames:
@@ -431,9 +440,9 @@ Cannot find UnicodeData.txt, please place it into
 working directory (optionally you can gzip, bzip2 or xz it).
 Without the file, searching will be much slower.
 
-You can donwload the file from http://www.unicode.org/Public/13.0.0/ucd/UnicodeData.txt (or replace 13.0.0 with current Unicode version).
+You can donwload the file from {} (or replace {} with current Unicode version).
 
-""" )
+""".format(get_unicodedata_url(), get_unicode_cur_version()))
 
     if prefill_cache:
         if f:
