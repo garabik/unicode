@@ -4,7 +4,7 @@ To use unicode utility, you need:
  - python >=2.6 (str format() method is needed), preferrably wide
    unicode build, however, python3 is recommended
  - python optparse library (part of since python2.3)
- - UnicodeData.txt file (http://www.unicode.org/Public) which
+ - UnicodeData.txt file (http://www.unicode.org/Public/13.0.0/ucd/UnicodeData.txt; or replace 13.0.0 with current Unicode version) which
    you should put into /usr/share/unicode/, ~/.unicode/ or current
    working directory.
     - apt-get install unicode-data  # Debian
