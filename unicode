@@ -2,9 +2,8 @@
 
 from __future__ import unicode_literals, print_function
 
-import os, glob, sys, unicodedata, locale, gzip, re, traceback, encodings, io, codecs
+import os, glob, sys, unicodedata, locale, gzip, re, traceback, encodings, io, codecs, shutil
 import webbrowser, textwrap, struct
-
 
 #from pprint import pprint
 
@@ -33,6 +32,7 @@ if PY3:
     import subprocess as cmd
     from urllib.parse import quote as urlquote
     import io
+    from urllib.request import urlopen
 
     def out(*args):
         "pring args, converting them to output charset"
@@ -52,6 +52,7 @@ else: # python2
     import commands as cmd
 
     from urllib import quote as urlquote
+    from urllib import urlopen
 
     def out(*args):
         "pring args, converting them to output charset"
@@ -423,6 +424,31 @@ def get_unicodedata_url():
     url = 'http://www.unicode.org/Public/{}/ucd/UnicodeData.txt'.format(unicode_version)
     return url
 
+def download_unicodedata():
+    url = get_unicodedata_url()
+    out('Downloading UnicodeData.txt from ', url, '\n')
+    HomeDir = os.path.expanduser('~/.unicode')
+    HomeUnicodeData = os.path.join(HomeDir, "UnicodeData.txt")
+
+    # we want to minimize the chance of leaving a corrupted file around
+    tmp_file = HomeUnicodeData+'.tmp'
+    try:
+        if not os.path.exists(HomeDir):
+            os.makedirs(HomeDir)
+        response = urlopen(url)
+        r = response.getcode()
+        if r != 200:
+            # this is handled automatically in python3, the exception will be raised by urlopen
+            raise IOError('HTTP response code '+str(r))
+        if os.path.exists(HomeUnicodeData):
+            out(HomeUnicodeData, ' already exists, but downloading as requested\n')
+        shutil.copyfileobj(response, open(tmp_file, 'wb'))
+        shutil.move(tmp_file, HomeUnicodeData)
+        out(HomeUnicodeData, ' downloaded\n')
+    finally:
+        if os.path.exists(tmp_file):
+            os.remove(tmp_file)
+
 def GrepInNames(pattern, prefill_cache=False):
     f = None
     for name in UnicodeDataFileNames:
@@ -442,9 +468,9 @@ Cannot find UnicodeData.txt, please place it into
 working directory (optionally you can gzip, bzip2 or xz it).
 Without the file, searching will be much slower.
 
-You can donwload the file from {} (or replace {} with current Unicode version).
+You can donwload the file from {} (or replace {} with current Unicode version); or run {} --download
 
-""".format(get_unicodedata_url(), get_unicode_cur_version()))
+""".format(get_unicodedata_url(), get_unicode_cur_version(), sys.argv[0]))
 
     if prefill_cache:
         if f:
@@ -941,6 +967,10 @@ def main():
           action="store_const", dest="format_string",
           const='{pchar} U+{ordc:04X} {name}\n',
           help="Brief format")
+    parser.add_option("--download",
+          action="store_const", dest="download_unicodedata",
+          const=True,
+          help="Try to dowload UnicodeData.txt")
     parser.add_option("--ascii",
           action="store_const", dest="ascii_table",
           const=True,
@@ -972,6 +1002,9 @@ def main():
         display_brexit_ascii_table()
         sys.exit()
 
+    if options.download_unicodedata:
+        download_unicodedata()
+        sys.exit()
 
     if len(arguments)==0:
         parser.print_help()
