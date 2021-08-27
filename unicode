@@ -233,9 +233,10 @@ def get_unicode_blocks_descriptions():
     for line in f:
         if line.startswith('#') or ';' not in line or '..' not in line:
             continue
-        ran, desc = line.split(';')
+        spl = line.split(';', 1)
+        ran, desc = spl
         desc = desc.strip()
-        low, high = ran.split('..')
+        low, high = ran.split('..', 1)
         low = int(low, 16)
         high = int(high, 16)
         unicodeblocks[ (low,high) ] = desc
@@ -259,7 +260,8 @@ def get_unicode_properties(ch):
         proplist = ['codepoint', 'name', 'category', 'combining', 'bidi', 'decomposition', 'dummy', 'digit_value', 'numeric_value', 'mirrored', 'unicode1name', 'iso_comment', 'uppercase', 'lowercase', 'titlecase']
         for i, prop in enumerate(proplist):
             if prop!='dummy':
-                properties[prop] = fields[i]
+                if i<len(fields):
+                    properties[prop] = fields[i]
         if properties['lowercase']:
             properties['lowercase'] = chr(int(properties['lowercase'], 16))
         if properties['uppercase']:
@@ -333,7 +335,10 @@ def get_unihan_properties_internal(ch):
             line = l.strip()
             if not line:
                 continue
-            char, key, value = line.strip().split('\t')
+            spl = line.strip().split('\t')
+            if len(spl) != 3:
+                continue
+            char, key, value = spl
             if int(char[2:], 16) == ch:
                 properties[key] = value
             elif int(char[2:], 16)>ch:
@@ -428,7 +433,7 @@ def download_unicodedata():
     url = get_unicodedata_url()
     out('Downloading UnicodeData.txt from ', url, '\n')
     HomeDir = os.path.expanduser('~/.unicode')
-    HomeUnicodeData = os.path.join(HomeDir, "UnicodeData.txt")
+    HomeUnicodeData = os.path.join(HomeDir, "UnicodeData.txt.gz")
 
     # we want to minimize the chance of leaving a corrupted file around
     tmp_file = HomeUnicodeData+'.tmp'
@@ -442,7 +447,7 @@ def download_unicodedata():
             raise IOError('HTTP response code '+str(r))
         if os.path.exists(HomeUnicodeData):
             out(HomeUnicodeData, ' already exists, but downloading as requested\n')
-        shutil.copyfileobj(response, open(tmp_file, 'wb'))
+        shutil.copyfileobj(response, gzip.open(tmp_file, 'wb'))
         shutil.move(tmp_file, HomeUnicodeData)
         out(HomeUnicodeData, ' downloaded\n')
     finally:
