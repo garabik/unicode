@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 
-from __future__ import unicode_literals
+from __future__ import unicode_literals, print_function
 
-import os, glob, sys, unicodedata, locale, gzip, re, traceback, encodings, io, codecs
+import os, glob, sys, unicodedata, locale, gzip, re, traceback, encodings, io, codecs, shutil
 import webbrowser, textwrap, struct
+
 #from pprint import pprint
 
 # bz2 was introduced in 2.3, but we want this to work even if for some
@@ -31,6 +32,7 @@ if PY3:
     import subprocess as cmd
     from urllib.parse import quote as urlquote
     import io
+    from urllib.request import urlopen
 
     def out(*args):
         "pring args, converting them to output charset"
@@ -50,6 +52,7 @@ else: # python2
     import commands as cmd
 
     from urllib import quote as urlquote
+    from urllib import urlopen
 
     def out(*args):
         "pring args, converting them to output charset"
@@ -66,7 +69,7 @@ else: # python2
 
 from optparse import OptionParser
 
-VERSION='2.8'
+VERSION='2.9'
 
 
 # list of terminals that support bidi
@@ -230,9 +233,10 @@ def get_unicode_blocks_descriptions():
     for line in f:
         if line.startswith('#') or ';' not in line or '..' not in line:
             continue
-        ran, desc = line.split(';')
+        spl = line.split(';', 1)
+        ran, desc = spl
         desc = desc.strip()
-        low, high = ran.split('..')
+        low, high = ran.split('..', 1)
         low = int(low, 16)
         high = int(high, 16)
         unicodeblocks[ (low,high) ] = desc
@@ -256,7 +260,8 @@ def get_unicode_properties(ch):
         proplist = ['codepoint', 'name', 'category', 'combining', 'bidi', 'decomposition', 'dummy', 'digit_value', 'numeric_value', 'mirrored', 'unicode1name', 'iso_comment', 'uppercase', 'lowercase', 'titlecase']
         for i, prop in enumerate(proplist):
             if prop!='dummy':
-                properties[prop] = fields[i]
+                if i<len(fields):
+                    properties[prop] = fields[i]
         if properties['lowercase']:
             properties['lowercase'] = chr(int(properties['lowercase'], 16))
         if properties['uppercase']:
@@ -330,9 +335,12 @@ def get_unihan_properties_internal(ch):
             line = l.strip()
             if not line:
                 continue
-            char, key, value = line.strip().split('\t')
+            spl = line.strip().split('\t')
+            if len(spl) != 3:
+                continue
+            char, key, value = spl
             if int(char[2:], 16) == ch:
-                properties[key] = value.decode('utf-8')
+                properties[key] = value
             elif int(char[2:], 16)>ch:
                 break
     return properties
@@ -412,6 +420,40 @@ def OpenGzip(fname):
         fo = codecs.getreader('utf-8')(fo)
         return fo
 
+def get_unicode_cur_version():
+    # return current version of the Unicode standard, hardwired for now
+    return '13.0.0'
+
+def get_unicodedata_url():
+    unicode_version = get_unicode_cur_version()
+    url = 'http://www.unicode.org/Public/{}/ucd/UnicodeData.txt'.format(unicode_version)
+    return url
+
+def download_unicodedata():
+    url = get_unicodedata_url()
+    out('Downloading UnicodeData.txt from ', url, '\n')
+    HomeDir = os.path.expanduser('~/.unicode')
+    HomeUnicodeData = os.path.join(HomeDir, "UnicodeData.txt.gz")
+
+    # we want to minimize the chance of leaving a corrupted file around
+    tmp_file = HomeUnicodeData+'.tmp'
+    try:
+        if not os.path.exists(HomeDir):
+            os.makedirs(HomeDir)
+        response = urlopen(url)
+        r = response.getcode()
+        if r != 200:
+            # this is handled automatically in python3, the exception will be raised by urlopen
+            raise IOError('HTTP response code '+str(r))
+        if os.path.exists(HomeUnicodeData):
+            out(HomeUnicodeData, ' already exists, but downloading as requested\n')
+        shutil.copyfileobj(response, gzip.open(tmp_file, 'wb'))
+        shutil.move(tmp_file, HomeUnicodeData)
+        out(HomeUnicodeData, ' downloaded\n')
+    finally:
+        if os.path.exists(tmp_file):
+            os.remove(tmp_file)
+
 def GrepInNames(pattern, prefill_cache=False):
     f = None
     for name in UnicodeDataFileNames:
@@ -428,10 +470,12 @@ def GrepInNames(pattern, prefill_cache=False):
 Cannot find UnicodeData.txt, please place it into
 /usr/share/unidata/UnicodeData.txt,
 /usr/share/unicode/UnicodeData.txt, ~/.unicode/ or current
-working directory (optionally you can gzip it).
+working directory (optionally you can gzip, bzip2 or xz it).
 Without the file, searching will be much slower.
 
-""" )
+You can donwload the file from {} (or replace {} with current Unicode version); or run {} --download
+
+""".format(get_unicodedata_url(), get_unicode_cur_version(), sys.argv[0]))
 
     if prefill_cache:
         if f:
@@ -924,10 +968,14 @@ def main():
           action="store", dest="format_string", type="string",
           default=format_string_default,
           help="formatting string")
-    parser.add_option("--brief", "--terse",
+    parser.add_option("--brief", "--terse", "--br",
           action="store_const", dest="format_string",
           const='{pchar} U+{ordc:04X} {name}\n',
           help="Brief format")
+    parser.add_option("--download",
+          action="store_const", dest="download_unicodedata",
+          const=True,
+          help="Try to dowload UnicodeData.txt")
     parser.add_option("--ascii",
           action="store_const", dest="ascii_table",
           const=True,
@@ -935,7 +983,7 @@ def main():
     parser.add_option("--brexit-ascii", "--brexit",
           action="store_const", dest="brexit_ascii_table",
           const=True,
-          help="Display ASCII table (EU–UK Trade and Cooperation Agreement version)")
+          help="Display ASCII table (EU-UK Trade and Cooperation Agreement version)")
 
     global options
     (options, arguments) = parser.parse_args()
@@ -959,6 +1007,9 @@ def main():
         display_brexit_ascii_table()
         sys.exit()
 
+    if options.download_unicodedata:
+        download_unicodedata()
+        sys.exit()
 
     if len(arguments)==0:
         parser.print_help()
