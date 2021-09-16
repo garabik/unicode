@@ -422,7 +422,7 @@ def OpenGzip(fname):
 
 def get_unicode_cur_version():
     # return current version of the Unicode standard, hardwired for now
-    return '13.0.0'
+    return '14.0.0'
 
 def get_unicodedata_url():
     unicode_version = get_unicode_cur_version()
