@@ -447,6 +447,7 @@ def download_unicodedata():
             raise IOError('HTTP response code '+str(r))
         if os.path.exists(HomeUnicodeData):
             out(HomeUnicodeData, ' already exists, but downloading as requested\n')
+        out('downloading...')
         shutil.copyfileobj(response, gzip.open(tmp_file, 'wb'))
         shutil.move(tmp_file, HomeUnicodeData)
         out(HomeUnicodeData, ' downloaded\n')
