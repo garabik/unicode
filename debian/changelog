@@ -2,7 +2,7 @@ unicode (2.9-1) unstable; urgency=low
 
   * better protection against changed/corrpupted data files (closes: #932846)
 
- -- Radovan Garabík <garabik@kassiopeia.juls.savba.sk  Fri, 03 Jun 2022 16:09:26 +0200
+ -- Radovan Garabík <garabik@kassiopeia.juls.savba.sk>  Fri, 03 Jun 2022 16:09:26 +0200
 
 unicode (2.8-1) unstable; urgency=low
 
