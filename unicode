@@ -408,19 +408,19 @@ def get_gzip_filename(fname):
     return None
 
 
-def OpenGzip(fname):
+def OpenGzip(fname, mode='rt'):
     "open fname, try fname.gz or fname.bz2 or fname.xz if fname does not exist, return file object or GzipFile or BZ2File object"
     fname = get_gzip_filename(fname)
     if not fname:
         return None
     if fname.endswith('.gz'):
-        return gzip.open(fname, mode='r', encoding='UTF-8')
+        return gzip.open(fname, mode=mode, encoding='utf-8')
     elif fname.endswith('.bz2'):
-        return bz2.BZ2File(fname, mode='r', encoding='UTF-8')
+        return bz2.BZ2File(fname, mode=mode, encoding='utf-8')
     elif fname.endswith('.xz'):
-        return lzma.open(fname, mode='r', encoding='UTF-8')
+        return lzma.open(fname, mode=mode, encoding='utf-8')
     else:
-        return io.open(fname, encoding='utf-8')
+        return io.open(fname, mode=mode, encoding='utf-8')
 
 def get_unicode_cur_version():
     # return current version of the Unicode standard, hardwired for now
