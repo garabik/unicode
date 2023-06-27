@@ -82,7 +82,13 @@ except locale.Error:
 
 # guess terminal charset
 try:
-    iocharsetguess = locale.nl_langinfo(locale.CODESET) or "ascii"
+    if hasattr(locale, 'nl_langinfo'):
+        if locale.nl_langinfo(locale.CODESET):
+            iocharsetguess = locale.nl_langinfo(locale.CODESET)
+        else: # not usual, probably misconfigured
+            iocharsetguess ='ascii'
+    else: # e.g. termux, but likely windows console (where utf-8 is incorrect)
+        iocharsetguess = 'utf-8'
 except locale.Error:
     iocharsetguess = "ascii"
 
