@@ -231,7 +231,7 @@ def get_unicode_blocks_descriptions():
     unicodeblocks = {} # (low, high): 'desc'
     f = None
     for name in UnicodeBlocksFiles:
-        f = OpenGzip(name)
+        f = AutoOpen(name)
         if f:
             break
     if not f:
@@ -335,7 +335,7 @@ def get_unihan_properties_internal(ch):
     ch = ord(ch)
     global unihan_fs
     for f in unihan_fs:
-        fo = OpenGzip(f)
+        fo = AutoOpen(f)
         for l in fo:
             if l.startswith('#'):
                 continue
@@ -408,7 +408,7 @@ def get_gzip_filename(fname):
     return None
 
 
-def OpenGzip(fname, mode='rt'):
+def AutoOpen(fname, mode='rt'):
     "open fname, try fname.gz or fname.bz2 or fname.xz if fname does not exist, return file object or GzipFile or BZ2File object"
     fname = get_gzip_filename(fname)
     if not fname:
@@ -460,7 +460,7 @@ def download_unicodedata():
 def GrepInNames(pattern, prefill_cache=False):
     f = None
     for name in UnicodeDataFileNames:
-        f = OpenGzip(name)
+        f = AutoOpen(name)
         if f != None:
             break
     if f:
