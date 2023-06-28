@@ -854,6 +854,7 @@ def get_derived_age(ch):
         low, high = lowhigh
         if low<=ch<=high:
             return age
+    return ''
 
 def print_block(block):
     #header
