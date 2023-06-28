@@ -69,7 +69,7 @@ else: # python2
 
 from optparse import OptionParser
 
-VERSION='2.9'
+VERSION='3.0'
 
 
 # list of terminals that support bidi
@@ -303,7 +303,6 @@ def get_unicode_properties(ch):
     properties['east_asian_width'] = get_east_asian_width(ch)
     return properties
 
-
 def do_init():
     HomeDir = os.path.expanduser('~/.unicode')
     HomeUnicodeData = os.path.join(HomeDir, "UnicodeData.txt")
@@ -319,6 +318,9 @@ def do_init():
     HomeUnicodeBlocks = os.path.join(HomeDir, "Blocks.txt")
     global UnicodeBlocksFiles
     UnicodeBlocksFiles = [HomeUnicodeBlocks, '/usr/share/unicode/Blocks.txt', '/usr/share/unicode-data/Blocks.txt', '/usr/share/unidata/Blocks.txt', './Blocks.txt']
+    global DerivedAgeFiles
+    DerivedAgeFiles = ['./DerivedAge.txt']
+
     # cache where grepped unicode properties are kept
     global linecache
     linecache = {}
@@ -381,6 +383,7 @@ def get_unihan_properties_zgrep(ch):
             elif int(char[2:], 16)>ch:
                 break
     return properties
+
 
 # basic sanity check, if e.g. you run this on MS Windows...
 if os.path.exists('/bin/grep'):
@@ -747,16 +750,24 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
         if bidi:
             opt_bidi = 'Bidi: '
             bidi_desc = ' ({0})\n'.format(bidi_desc)
+
         mirrored_desc = ''
         mirrored = properties['mirrored']
         if mirrored:
             mirrored_desc = 'Character is mirrored\n'
+
         opt_combining = ''
         comb = properties['combining']
         combining_desc = ''
         if comb:
             opt_combining = 'Combining: '
             combining_desc = "{comb} ({comb_class})\n".format(comb=comb, comb_class=comb_classes.get(comb, '?'))
+
+        opt_derivedage = ''
+        opt_deriveage_desc = get_derived_age(c)
+        if opt_deriveage_desc:
+            opt_derivedage = 'Age: '
+            opt_deriveage_desc += '\n'
 
         opt_decomp = ''
         decomp_desc = ''
@@ -797,6 +808,52 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
 def get_east_asian_width(c):
     eaw = 'east_asian_width' in unicodedata.__dict__ and unicodedata.east_asian_width(c)
     return eaw
+
+def get_derived_ages_data(DerivedAgeFiles):
+    "parses DerivedAge.txt"
+
+    derivedages = {} # (low, high): 'version'
+    f = None
+    for name in DerivedAgeFiles:
+        f = AutoOpen(name)
+        if f:
+            break
+    if not f:
+        return {}
+    for line in f:
+        if line.startswith('#') or ';' not in line:
+            continue
+        spl = line.split(';', 1)
+        ran, age_comm = spl
+        age = age_comm.split('#', 1)[0]
+        age = age.strip()
+        lowhigh = ran.split('..', 1)
+        if len(lowhigh) == 1:
+            low = lowhigh[0]
+            high = low
+        elif len(lowhigh) == 2:
+            low, high = lowhigh
+        else:
+            raise ValueError('Error in DerivedAge.txt: '+repr(line))
+        low = int(low, 16)
+        high = int(high, 16)
+        derivedages[ (low,high) ] = age
+    f.close()
+    return derivedages
+
+
+derivedages = None 
+
+def get_derived_age(ch):
+    "return start_of_block, end_of_block, block_name"
+    global derivedages
+    if derivedages is None:
+        derivedages = get_derived_ages_data(DerivedAgeFiles)
+    ch = ord(ch)
+    for lowhigh, age in derivedages.items():
+        low, high = lowhigh
+        if low<=ch<=high:
+            return age
 
 def print_block(block):
     #header
@@ -905,7 +962,7 @@ format_string_default = '''{yellow}{bold}U+{ordc:04X} {name}{default}
 {pchar}{opt_flipcase}{opt_uppercase}{opt_lowercase}
 {green}Category:{default} {category} ({category_desc}); {green}{opt_eaw}{default}{eaw_desc}
 {green}{opt_unicode_block}{default}{opt_unicode_block_desc}{green}{opt_numeric}{default}{numeric_desc}{green}{opt_digit}{default}{digit_desc}{green}{opt_bidi}{default}{bidi}{bidi_desc}
-{mirrored_desc}{green}{opt_combining}{default}{combining_desc}{green}{opt_decomp}{default}{decomp_desc}
+{mirrored_desc}{green}{opt_combining}{default}{combining_desc}{green}{opt_decomp}{default}{decomp_desc}{green}{opt_derivedage}{default}{opt_deriveage_desc}
 '''
 
 def main():
