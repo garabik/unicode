@@ -18,7 +18,6 @@ try:
 except ImportError:
     lzma = None
 
-
 def is_ascii(s):
     "test is string s consists completely of ascii characters"
     try:
@@ -764,10 +763,10 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
             combining_desc = "{comb} ({comb_class})\n".format(comb=comb, comb_class=comb_classes.get(comb, '?'))
 
         opt_derivedage = ''
-        opt_deriveage_desc = get_derived_age(c)
-        if opt_deriveage_desc:
+        opt_derivedage_age, opt_derivedage_desc = get_derived_age(c)
+        if opt_derivedage_desc or opt_derivedage_age: # both should be either empty or set
             opt_derivedage = 'Age: '
-            opt_deriveage_desc += '\n'
+            opt_derivedage_desc += '\n'
 
         opt_decomp = ''
         decomp_desc = ''
@@ -812,7 +811,8 @@ def get_east_asian_width(c):
 def get_derived_ages_data(DerivedAgeFiles):
     "parses DerivedAge.txt"
 
-    derivedages = {} # (low, high): 'version'
+    derivedages = {} # (low, high): ('version', comment)
+    previous_age = None
     f = None
     for name in DerivedAgeFiles:
         f = AutoOpen(name)
@@ -821,12 +821,20 @@ def get_derived_ages_data(DerivedAgeFiles):
     if not f:
         return {}
     for line in f:
-        if line.startswith('#') or ';' not in line:
+        if line.startswith('#') and ('ssigned in' in line or 'ssigned as of' in line):
+            last_assigned_comment = line
+            continue
+        elif line.startswith('#'):
+            continue
+        elif ';' not in line:
             continue
         spl = line.split(';', 1)
         ran, age_comm = spl
         age = age_comm.split('#', 1)[0]
         age = age.strip()
+        if age != previous_age:
+            current_assigned_comment = last_assigned_comment
+            previous_age = age
         lowhigh = ran.split('..', 1)
         if len(lowhigh) == 1:
             low = lowhigh[0]
@@ -837,7 +845,7 @@ def get_derived_ages_data(DerivedAgeFiles):
             raise ValueError('Error in DerivedAge.txt: '+repr(line))
         low = int(low, 16)
         high = int(high, 16)
-        derivedages[ (low,high) ] = age
+        derivedages[ (low,high) ] = age, current_assigned_comment
     f.close()
     return derivedages
 
@@ -850,11 +858,12 @@ def get_derived_age(ch):
     if derivedages is None:
         derivedages = get_derived_ages_data(DerivedAgeFiles)
     ch = ord(ch)
-    for lowhigh, age in derivedages.items():
+    for lowhigh, agecomment in derivedages.items():
         low, high = lowhigh
+        age, comment = agecomment
         if low<=ch<=high:
-            return age
-    return ''
+            return age , comment.lstrip('#').strip()
+    return '', ''
 
 def print_block(block):
     #header
@@ -962,7 +971,7 @@ format_string_default = '''{yellow}{bold}U+{ordc:04X} {name}{default}
 {green}UTF-8:{default} {utf8} {green}UTF-16BE:{default} {utf16be} {green}Decimal:{default} {decimal} {green}Octal:{default} {octal}{opt_additional}
 {pchar}{opt_flipcase}{opt_uppercase}{opt_lowercase}
 {green}Category:{default} {category} ({category_desc}); {green}{opt_eaw}{default}{eaw_desc}
-{green}{opt_unicode_block}{default}{opt_unicode_block_desc}{green}{opt_numeric}{default}{numeric_desc}{green}{opt_digit}{default}{digit_desc}{green}{opt_bidi}{default}{bidi}{bidi_desc}{mirrored_desc}{green}{opt_combining}{default}{combining_desc}{green}{opt_decomp}{default}{decomp_desc}{green}{opt_derivedage}{default}{opt_deriveage_desc}
+{green}{opt_unicode_block}{default}{opt_unicode_block_desc}{green}{opt_numeric}{default}{numeric_desc}{green}{opt_digit}{default}{digit_desc}{green}{opt_bidi}{default}{bidi}{bidi_desc}{mirrored_desc}{green}{opt_combining}{default}{combining_desc}{green}{opt_decomp}{default}{decomp_desc}{green}{opt_derivedage}{default}{opt_derivedage_desc}
 '''
 
 def main():
