@@ -834,6 +834,7 @@ def get_derived_ages_data(DerivedAgeFiles):
         if age != previous_age:
             current_assigned_comment = last_assigned_comment
             previous_age = age
+            last_assigned_comment = ''
         lowhigh = ran.split('..', 1)
         if len(lowhigh) == 1:
             low = lowhigh[0]
