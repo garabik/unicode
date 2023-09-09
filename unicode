@@ -850,8 +850,7 @@ def get_derived_ages_data(DerivedAgeFiles):
     return derivedages
 
 
-derivedages = None 
-
+derivedages = None
 def get_derived_age(ch):
     "return start_of_block, end_of_block, block_name"
     global derivedages
@@ -964,7 +963,6 @@ def display_brexit_ascii_table():
             cell = ' {:3s} '.format(ch)
             print(cell, end='')
         print()
-
 
 
 format_string_default = '''{yellow}{bold}U+{ordc:04X} {name}{default}
