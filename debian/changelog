@@ -1,5 +1,7 @@
 unicode (3.1-1) unstable; urgency=low
 
+  * better error handling sometimes
+  * python2 support is officially deprecated
   * catch BrokenPipeError (closes: #1033348)
   * use dh-sequence-python3 (closes: #1059579)
 
