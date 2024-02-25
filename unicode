@@ -18,6 +18,10 @@ try:
 except ImportError:
     lzma = None
 
+def get_unicode_cur_version():
+    # return current version of the Unicode standard, hardwired for now
+    return '15.1.0'
+
 def is_ascii(s):
     "test is string s consists completely of ascii characters"
     try:
@@ -422,10 +426,6 @@ def AutoOpen(fname, mode='rt'):
         return lzma.open(fname, mode=mode, encoding='utf-8')
     else:
         return io.open(fname, mode=mode, encoding='utf-8')
-
-def get_unicode_cur_version():
-    # return current version of the Unicode standard, hardwired for now
-    return '15.0.0'
 
 def get_unicodedata_url():
     unicode_version = get_unicode_cur_version()
