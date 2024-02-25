@@ -43,7 +43,6 @@ if PY3:
             try:
                 func(*args, **kwargs)
             except BrokenPipeError:
-                 #print(func.__name__, "broken pipe")
                  sys.stdout = None
                  sys.exit(1)
         return inner_function
@@ -76,11 +75,9 @@ else: # python2
             try:
                 func(*args, **kwargs)
             except IOError:
-                 #print(func.__name__, "broken pipe")
                  sys.stdout = None
                  sys.exit(1)
         return inner_function
-
 
     @broken_pipe_handler
     def out(*args):
@@ -105,7 +102,7 @@ def flush_output():
 
 from optparse import OptionParser
 
-VERSION='3.0'
+VERSION='3.1'
 
 
 # list of terminals that support bidi
@@ -1164,3 +1161,4 @@ Warning, listing UniHan Properties is rather slow.
 
 if __name__ == '__main__':
     main()
+
