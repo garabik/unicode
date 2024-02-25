@@ -22,14 +22,6 @@ def get_unicode_cur_version():
     # return current version of the Unicode standard, hardwired for now
     return '15.1.0'
 
-def is_ascii(s):
-    "test is string s consists completely of ascii characters"
-    try:
-        s.encode('ascii')
-    except UnicodeEncodeError:
-        return False
-    return True
-
 PY3 = sys.version_info[0] >= 3
 
 if PY3:
@@ -94,13 +86,25 @@ else: # python2
     str = unicode
     range = xrange
 
+
+from optparse import OptionParser
+
 @broken_pipe_handler
 def flush_output():
     if sys.stdout:
         sys.stdout.flush()
 
+def warn(msg):
+    sys.stderr.write(msg)
 
-from optparse import OptionParser
+def is_ascii(s):
+    "test is string s consists completely of ascii characters"
+    try:
+        s.encode('ascii')
+    except UnicodeEncodeError:
+        return False
+    return True
+
 
 VERSION='3.1'
 
@@ -549,7 +553,11 @@ def valfromcp(n, cp=None):
         # is not permitted in struct.pack in python2.6
         cps = ( struct.pack(chr_orig(0x42),i) for i in cps ) # this works in both python3 and python2, unlike bytes([i])
         cps = b''.join(cps)
-        cps = cps.decode(cp)
+        try:
+            cps = cps.decode(cp)
+        except UnicodeDecodeError as e:
+            warn(repr(e)+'\n')
+            cps = cps.decode(cp, errors='ignore')
         cps = [ord(x) for x in cps]
         return cps
     else:
@@ -714,7 +722,7 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
             counter += 1
         if counter > options.maxcount:
             flush_output()
-            sys.stderr.write("\nToo many characters to display, more than %s, use --max 0 (or other value) option to change it\n" % options.maxcount)
+            warn("\nToo many characters to display, more than %s, use --max 0 (or other value) option to change it\n" % options.maxcount)
             return
         properties = get_unicode_properties(c)
         ordc = ord(c)
