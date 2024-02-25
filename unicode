@@ -31,17 +31,31 @@ def is_ascii(s):
     return True
 
 PY3 = sys.version_info[0] >= 3
+
 if PY3:
     import subprocess as cmd
     from urllib.parse import quote as urlquote
     import io
     from urllib.request import urlopen
 
+    def broken_pipe_handler(func):
+        def inner_function(*args, **kwargs):
+            try:
+                func(*args, **kwargs)
+            except BrokenPipeError:
+                 #print(func.__name__, "broken pipe")
+                 sys.stdout = None
+                 sys.exit(1)
+        return inner_function
+
+
+    @broken_pipe_handler
     def out(*args):
         "pring args, converting them to output charset"
         for i in args:
-            #sys.stdout.flush()
-            sys.stdout.buffer.write(i.encode(options.iocharset, 'replace'))
+            if sys.stdout:
+                #sys.stdout.flush()
+                sys.stdout.buffer.write(i.encode(options.iocharset, 'replace'))
 
     # ord23 is used to convert elements of byte array in python3, which are already integers
     ord23 = lambda x: x
@@ -57,10 +71,23 @@ else: # python2
     from urllib import quote as urlquote
     from urllib import urlopen
 
+    def broken_pipe_handler(func):
+        def inner_function(*args, **kwargs):
+            try:
+                func(*args, **kwargs)
+            except IOError:
+                 #print(func.__name__, "broken pipe")
+                 sys.stdout = None
+                 sys.exit(1)
+        return inner_function
+
+
+    @broken_pipe_handler
     def out(*args):
         "pring args, converting them to output charset"
         for i in args:
-            sys.stdout.write(i.encode(options.iocharset, 'replace'))
+            if sys.stdout:
+                sys.stdout.write(i.encode(options.iocharset, 'replace'))
 
     ord23 = ord
 
@@ -69,6 +96,12 @@ else: # python2
     chr = unichr
     str = unicode
     range = xrange
+
+@broken_pipe_handler
+def flush_output():
+    if sys.stdout:
+        sys.stdout.flush()
+
 
 from optparse import OptionParser
 
@@ -683,7 +716,7 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
         if maxcount:
             counter += 1
         if counter > options.maxcount:
-            sys.stdout.flush()
+            flush_output()
             sys.stderr.write("\nToo many characters to display, more than %s, use --max 0 (or other value) option to change it\n" % options.maxcount)
             return
         properties = get_unicode_properties(c)
@@ -1089,9 +1122,10 @@ def main():
     elif options.use_colour.lower() in ("off", "0", "false", "no"):
         options.use_colour = False
     else:
-        options.use_colour = sys.stdout.isatty()
-        if sys.platform == 'win32':
+        if sys.platform == 'win32' or sys.stdout is None:
             options.use_colour = False
+        else:
+           options.use_colour = sys.stdout.isatty()
 
     l_args = [] # list of non range arguments to process
     for argum in arguments:
