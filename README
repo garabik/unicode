@@ -1,14 +1,13 @@
 This file is in UTF-8 encoding.
 
 To use unicode utility, you need: 
- - python >=2.6 (str format() method is needed), preferrably wide
-   unicode build, however, python3 is recommended
- - python optparse library (part of since python2.3)
- - UnicodeData.txt file (http://www.unicode.org/Public/13.0.0/ucd/UnicodeData.txt; or replace 13.0.0 with current Unicode version) which
-   you should put into /usr/share/unicode/, ~/.unicode/ or current
+ - python3
+ - there is still some python2 compatibility, but now it is unsupported (and will fail when UnicodeData.txt is compressed)
+ - (recommended) UnicodeData.txt file in /usr/share/unicode/, ~/.unicode/ or current
    working directory.
     - apt-get install unicode-data  # Debian
     - dnf install unicode-ucd       # Fedora
+    - unicode --download            # try to download the file
  - if you want to see Unicode block information, you also need
    Blocks.txt file, which you should put into /usr/share/unicode/,
    ~/.unicode/ or current working directory.
