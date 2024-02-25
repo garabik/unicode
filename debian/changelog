@@ -1,3 +1,10 @@
+unicode (3.1-1) unstable; urgency=low
+
+  * catch BrokenPipeError (closes: #1033348)
+  * use dh-sequence-python3 (closes: #1059579)
+
+ -- Radovan Garabík <garabik@kassiopeia.juls.savba.sk>  Sun, 25 Feb 2024 09:50:19 +0100
+
 unicode (2.9-1) unstable; urgency=low
 
   * better protection against changed/corrpupted data files (closes: #932846)

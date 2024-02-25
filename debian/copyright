@@ -1,11 +1,25 @@
-This program was written by Radovan Garabík 
-<garabik @ kassiopeia.juls.savba.sk> on 
-Fri,  7 Feb 2003 15:09:19 +0100, and
-packaged for Debian as a native package.
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: unicode
+Upstream-Contact: Radovan Garabík <garabik@kassiopeia.juls.savba.sk>
+Source: http://kassiopeia.juls.savba.sk/~garabik/software/unicode/
 
-The sources and package can be downloaded from:
-http://kassiopeia.juls.savba.sk/~garabik/software/unicode/
+Files: *
+Copyright: 2003-2024 Radovan Garabík <garabik@kassiopeia.juls.savba.sk>
+License: GPL-3.0-only
 
+License: GPL-3.0-only
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, version 3.
+ .
+ This package is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program. If not, see <https://www.gnu.org/licenses/>.
+Comment:
+ On Debian systems, the full text of the GNU General Public License
+ version 3 can be found in the file '/usr/share/common-licenses/GPL-3'.
 
-Copyright: © 2003-2022 Radovan Garabík <garabik @ kassiopeia.juls.savba.sk>
-released under GPL v3, see /usr/share/common-licenses/GPL
