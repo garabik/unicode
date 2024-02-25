@@ -97,6 +97,11 @@ def flush_output():
 def warn(msg):
     sys.stderr.write(msg)
 
+def error(txt):
+    warn(txt)
+    warn('\n')
+    sys.exit(1)
+
 def is_ascii(s):
     "test is string s consists completely of ascii characters"
     try:
@@ -427,11 +432,6 @@ if os.path.exists('/bin/grep'):
 else:
     get_unihan_properties = get_unihan_properties_internal
 
-
-def error(txt):
-    out(txt)
-    out('\n')
-    sys.exit(1)
 
 def get_gzip_filename(fname):
     "return fname, if it does not exist, return fname+.gz, if neither that, fname+.bz2, if neither that, fname+.xz, if neither that, return None"
