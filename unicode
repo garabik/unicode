@@ -43,8 +43,8 @@ if PY3:
             try:
                 func(*args, **kwargs)
             except BrokenPipeError:
-                 sys.stdout = None
-                 sys.exit(1)
+                sys.stdout = None
+                sys.exit(1)
         return inner_function
 
 
