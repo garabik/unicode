@@ -94,12 +94,11 @@ def flush_output():
     if sys.stdout:
         sys.stdout.flush()
 
-def warn(msg):
-    sys.stderr.write(msg)
+def warn(*msg):
+    print(*msg, file=sys.stderr)
 
-def error(txt):
-    warn(txt)
-    warn('\n')
+def error(*msg):
+    warn(*msg)
     sys.exit(1)
 
 def is_ascii(s):
@@ -556,7 +555,7 @@ def valfromcp(n, cp=None):
         try:
             cps = cps.decode(cp)
         except UnicodeDecodeError as e:
-            warn(repr(e)+'\n')
+            warn(repr(e))
             cps = cps.decode(cp, errors='ignore')
         cps = [ord(x) for x in cps]
         return cps
@@ -722,7 +721,7 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
             counter += 1
         if counter > options.maxcount:
             flush_output()
-            warn("\nToo many characters to display, more than %s, use --max 0 (or other value) option to change it\n" % options.maxcount)
+            warn("\nToo many characters to display, more than %s, use --max 0 (or other value) option to change it" % options.maxcount)
             return
         properties = get_unicode_properties(c)
         ordc = ord(c)
@@ -1089,7 +1088,7 @@ def main():
           action="store_const", dest="brexit_ascii_table",
           const=True,
           help="Display ASCII table (EU-UK Trade and Cooperation Agreement version)")
-    parser.add_option("--input-file",
+    parser.add_option("-f", "--input-file",
           action="store", dest="input_file", type="string",
           help="File to analyse")
 
@@ -1124,16 +1123,19 @@ def main():
         sys.exit()
 
     if options.input_file is not None:
-        try:
-            with open(options.input_file, 'r') as input_file:
-                # FIXME: Now it reads a file all at once, but
-                # shouldn't it be reading each codepoint one at a
-                # time?
-                arguments = [input_file.read()]
-            options.type = 'string'
-        except FileNotFoundError as e:
-            print("File not found:", options.input_file, file=sys.stderr)
-
+        if options.input_file == '-':
+            input_file_fd = sys.stdin
+        else:
+            try:
+                input_file_fd = open(options.input_file, 'r')
+            except FileNotFoundError:
+                error("File not found:", options.input_file)
+                sys.exit(1)
+        # FIXME: Now it reads a file all at once, but
+        # shouldn't it be reading each codepoint one at a
+        # time?
+        arguments = [input_file_fd.read()]
+        options.type = 'string'
 
     if options.use_colour.lower() in ("on", "1", "true", "yes"):
         # we reuse the options.use_colour, so that we do not need to use another global
