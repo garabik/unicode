@@ -25,7 +25,7 @@ characters given.
 
 Here are just some examples:
 
-$ unicode.py euro
+$ unicode euro
 U+20A0 EURO-CURRENCY SIGN
 UTF-8: e2 82 a0   UTF-16BE: 20a0   Decimal: &#8352;
 ₠
@@ -38,7 +38,7 @@ UTF-8: e2 82 ac   UTF-16BE: 20ac   Decimal: &#8364;
 Category: Sc (Symbol, Currency)
 Bidi: ET (European Number Terminator)
 
-$ unicode.py 00c0
+$ unicode 00c0
 U+00C0 LATIN CAPITAL LETTER A WITH GRAVE
 UTF-8: c3 80   UTF-16BE: 00c0   Decimal: &#192;
 À (à)
