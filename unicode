@@ -1089,6 +1089,9 @@ def main():
           action="store_const", dest="brexit_ascii_table",
           const=True,
           help="Display ASCII table (EU-UK Trade and Cooperation Agreement version)")
+    parser.add_option("--input-file",
+          action="store", dest="input_file", type="string",
+          help="File to analyse")
 
     global options
     (options, arguments) = parser.parse_args()
@@ -1116,9 +1119,20 @@ def main():
         download_unicodedata()
         sys.exit()
 
-    if len(arguments)==0:
+    if len(arguments)==0 and options.input_file is None:
         parser.print_help()
         sys.exit()
+
+    if options.input_file is not None:
+        try:
+            with open(options.input_file, 'r') as input_file:
+                # FIXME: Now it reads a file all at once, but
+                # shouldn't it be reading each codepoint one at a
+                # time?
+                arguments = [input_file.read()]
+            options.type = 'string'
+        except FileNotFoundError as e:
+            print("File not found:", options.input_file, file=sys.stderr)
 
 
     if options.use_colour.lower() in ("on", "1", "true", "yes"):
