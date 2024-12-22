@@ -703,8 +703,10 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
     """
     counter = 0
 
-    for colour_key in colours.keys():
-        locals()[colour_key] = maybe_colours(colour_key)
+    arguments = {
+        colour_key: maybe_colours(colour_key)
+        for colour_key in colours.keys()
+    }
 
     for c in clist:
 
@@ -760,11 +762,13 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
         flipcase = None
         if uppercase:
             ord_uppercase = ord(properties['uppercase'])
-            opt_uppercase = '\n{green}Uppercase:{default} {ord_uppercase:04X}'.format(**locals())
+            arguments.update(locals())
+            opt_uppercase = '\n{green}Uppercase:{default} {ord_uppercase:04X}'.format(**arguments)
             flipcase = uppercase
         elif lowercase:
             ord_lowercase = ord(properties['lowercase'])
-            opt_lowercase = '\n{green}Lowercase:{default} {ord_lowercase:04X}'.format(**locals())
+            arguments.update(locals())
+            opt_lowercase = '\n{green}Lowercase:{default} {ord_lowercase:04X}'.format(**arguments)
             flipcase = lowercase
 
         opt_numeric = ''
@@ -823,15 +827,17 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
             opt_unicode_block = 'Unicode block: '
             opt_unicode_block_desc = "{low:04X}..{high:04X}; {desc}\n".format(low=low,high=high,desc=desc)
 
+        arguments.update(locals())
         if addcharset:
-            opt_additional = ' {green}{addcharset}:{default} {in_additional_charset}'.format(**locals())
+            opt_additional = ' {green}{addcharset}:{default} {in_additional_charset}'.format(**arguments)
         else:
             opt_additional = ''
         if flipcase:
-            opt_flipcase = ' ({flipcase})'.format(**locals())
+            opt_flipcase = ' ({flipcase})'.format(**arguments)
         else:
             opt_flipcase = ''
-        formatted_output = format_string.format(**locals())
+        arguments.update(locals())
+        formatted_output = format_string.format(**arguments)
         out(formatted_output)
 
 
