@@ -20,7 +20,7 @@ except ImportError:
 
 def get_unicode_cur_version():
     # return current version of the Unicode standard, hardwired for now
-    return '16.0'
+    return '16.0.0'
 
 PY3 = sys.version_info[0] >= 3
 
