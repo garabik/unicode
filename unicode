@@ -94,8 +94,9 @@ def flush_output():
     if sys.stdout:
         sys.stdout.flush()
 
-def warn(*msg):
-    print(*msg, file=sys.stderr)
+def warn(*msg, **kwargs):
+    print(*msg, **kwargs, file=sys.stderr)
+    sys.stderr.flush()
 
 def error(*msg):
     warn(*msg)
@@ -467,7 +468,7 @@ def get_unicodedata_url():
 
 def download_unicodedata():
     url = get_unicodedata_url()
-    out('Downloading UnicodeData.txt from ', url, '\n')
+    warn('Starting download of UnicodeData.txt from ', url)
     HomeDir = os.path.expanduser('~/.unicode')
     HomeUnicodeData = os.path.join(HomeDir, "UnicodeData.txt.gz")
 
@@ -482,11 +483,11 @@ def download_unicodedata():
             # this is handled automatically in python3, the exception will be raised by urlopen
             raise IOError('HTTP response code '+str(r))
         if os.path.exists(HomeUnicodeData):
-            out(HomeUnicodeData, ' already exists, but downloading as requested\n')
-        out('downloading...')
+            warn(HomeUnicodeData, ' already exists, but downloading as requested\n')
+        warn('downloading... ', end='')
         shutil.copyfileobj(response, gzip.open(tmp_file, 'wb'))
         shutil.move(tmp_file, HomeUnicodeData)
-        out(HomeUnicodeData, ' downloaded\n')
+        warn(HomeUnicodeData, ' downloaded')
     finally:
         if os.path.exists(tmp_file):
             os.remove(tmp_file)
