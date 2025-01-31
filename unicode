@@ -728,10 +728,17 @@ def print_characters(clist, maxcount, format_string, query_wikipedia=0, query_wi
             return
         properties = get_unicode_properties(c)
         ordc = ord(c)
-        if properties['name'] and properties['name'] != '<control>':
-            name = properties['name']
-        else:
-            name = properties['unicode1name'] or properties['name'] or " - No such unicode character name in database"
+        name = properties['name']
+        if (not name) or name.startswith('<'):
+            unicode1name = properties['unicode1name']
+            if unicode1name and not unicode1name.startswith('<'):
+                name = unicode1name
+            else:
+                internal_name = unicodedata.name(c, '')
+                if internal_name:
+                    name = internal_name
+        if not name:
+            name = " - No such unicode character name in database"
         if 0xd800 <= ordc <= 0xdfff: # surrogate
             utf8 = utf16be = 'N/A'
         else:
